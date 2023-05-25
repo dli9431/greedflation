@@ -1,0 +1,46 @@
+# Python
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+*.so
+*.egg
+*.egg-info
+dist
+build
+*.tar.gz
+
+# Scrapy
+.scrapy
+
+# Virtualenv
+venv/
+*.venv
+env/
+venv.bak/
+ENV/
+
+# Pytest
+.pytest_cache/
+
+# Logs
+logs
+*.log
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# IDEs and text editors
+.vscode
+.idea
+*.swp
+*.swo
+*.swn
+*.bak
+*.sublime*
+*.pyc
