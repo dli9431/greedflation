@@ -1,8 +1,10 @@
 # greedflation-scraper
 
 To build the project you'll need:
+
 Docker Engine
 https://docs.docker.com/engine/install/
+
 Docker Compose
 https://docs.docker.com/compose/install/
 
