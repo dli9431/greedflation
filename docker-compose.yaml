@@ -1,0 +1,8 @@
+services:
+  scraper:
+    container_name: greedflation-scraper
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
