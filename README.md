@@ -1,4 +1,5 @@
-# greedflation-scraper
+# greedflation
+App to track grocery store price inflation and shrinkflation.
 
 To build the project you'll need:
 
@@ -17,8 +18,8 @@ docker-compose up frontend backend
 To run scraper  
 docker-compose up scraper
 
-Tests  
-scraper  
+testing scraper  
 docker-compose run --rm -e pytest=true scraper
-backend  
+
+testing backend  
 docker-compose run --rm -e FLASK_ENV=test backend
