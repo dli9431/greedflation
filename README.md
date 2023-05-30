@@ -17,8 +17,7 @@ docker-compose up frontend backend
 To run scraper  
 docker-compose up scraper
 
-Tests
-
+Tests  
 scraper  
 docker-compose run --rm -e pytest=true scraper
 backend  

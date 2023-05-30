@@ -18,8 +18,5 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 # Although note that Scrapy doesn't run as a server, so it might not need a port exposed
 # EXPOSE 5000
 
-# Run Scrapy when the container launches, adjust the command as per your Scrapy project's structure
-# CMD ["scrapy", "crawl", "initspider"]
-
 # Run Scrapy or pytest when container launches (if environment variable is set)
 CMD ["/bin/bash", "-c", "if [ \"$pytest\" = \"true\" ]; then pytest; else scrapy crawl initspider; fi"]

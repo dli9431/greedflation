@@ -1,8 +1,30 @@
 services:
   scraper:
-    container_name: greedflation-scraper
     build:
-      context: .
+      context: ./scraper
       dockerfile: Dockerfile
     volumes:
-      - .:/app
+      - ./scraper:/app
+  frontend:
+    image: frontend:development
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+  backend:
+    image: backend:development
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports: 
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - FLASK_ENV=development
