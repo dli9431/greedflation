@@ -18,6 +18,8 @@ jobs:
 
     - name: Install dependencies
       run: |
+        python -m venv venv
+        source venv/bin/activate
         python -m pip install --upgrade pip
         if [ -f scraper/requirements.txt ]; then pip install -r scraper/requirements.txt; fi
 
