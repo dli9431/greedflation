@@ -28,7 +28,7 @@ jobs:
         run: |
           docker build -t scraper ./scraper
           docker run --rm -e pytest=true scraper
-  build_and_test:
+  test:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
