@@ -2,3 +2,4 @@ Flask==2.3.2
 pymongo==4.3.3
 gspread==5.9.0
 google-auth==2.18.0
+pytest==7.3.1

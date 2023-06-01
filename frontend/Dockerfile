@@ -7,20 +7,17 @@ WORKDIR /app
 # Copy the package and lock files into the container
 COPY package.json ./
 
+# Add ARG for build
+ARG build
+
 # Install any needed packages specified in package.json
-RUN npm install
+RUN if [ "$build" = "production" ]; then npm install --production; else npm install; fi
 
 # Copy the rest of the app code into the container
 COPY . .
 
-# Build the project based on the build argument
-ARG build
-
 # Set the build environment based on the build argument
 ENV NODE_ENV=${build}
-
-# Build the project with Webpack
-# RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
 
 # Expose port 3000
 EXPOSE 3000

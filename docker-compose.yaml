@@ -3,6 +3,8 @@ services:
     build:
       context: ./scraper
       dockerfile: Dockerfile
+      args:
+        build: ${build}
     volumes:
       - ./scraper:/app
   frontend:
@@ -10,21 +12,21 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        build: ${build}
     ports:
       - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
   backend:
     image: backend:development
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        build: ${build}
     ports: 
       - "5000:5000"
     volumes:
       - ./backend:/app
-    environment:
-      - FLASK_ENV=development
