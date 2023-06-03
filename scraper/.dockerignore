@@ -1,0 +1,14 @@
+# Ignore .git directory
+.git
+
+# Ignore cache directories
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore the venv directory
+venv
+
+# Ignore pytest cache directories
+.pytest_cache

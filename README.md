@@ -12,9 +12,14 @@ https://docs.docker.com/compose/install/
 ---
 
 Building the scraper in dev (test) mode  
-docker compose up --build --force-recreate scraper
+build=development docker compose build scraper
+
+Running scraper in test mode  
+build=development docker compose run --rm scraper
 
 Building the scraper in production mode  
-export build=production  
-docker compose up --build scraper
+build=production docker compose build scraper
+
+Running the scraper in production mode  
+build=production docker compose run --rm scraper
 

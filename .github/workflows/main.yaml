@@ -26,8 +26,8 @@ jobs:
           if [ -f scraper/dev-requirements.txt ]; then pip install -r scraper/dev-requirements.txt; fi
       - name: Build and test scraper
         run: |
-          docker build --build-arg=development -t scraper ./scraper
-          docker run --rm -e scraper
+          build=development docker compose build scraper
+          build=development docker compose run --rm scraper
   test:
     runs-on: ubuntu-latest
     steps:
@@ -45,5 +45,5 @@ jobs:
         if [ -f scraper/requirements.txt ]; then pip install -r scraper/requirements.txt; fi
     - name: Build
       run: |
-        docker build --build-arg=production -t scraper ./scraper
-        docker run --rm -e build=production scraper
+        build=production docker compose build scraper
+        build=production docker compose run --rm scraper

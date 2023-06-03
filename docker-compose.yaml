@@ -5,8 +5,10 @@ services:
       dockerfile: Dockerfile
       args:
         build: ${build}
-    volumes:
-      - ./scraper:/app
+    environment:
+      - BUILD_ENV=${build}
+    # volumes:
+    #   - ./scraper:/app
   frontend:
     image: frontend:development
     build:
