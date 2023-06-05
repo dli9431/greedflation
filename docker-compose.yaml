@@ -10,7 +10,7 @@ services:
     # volumes:
     #   - ./scraper:/app
   frontend:
-    image: frontend:development
+    image: frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -22,12 +22,14 @@ services:
       - ./frontend:/app
       - /app/node_modules
   backend:
-    image: backend:development
+    image: backend
     build:
       context: ./backend
       dockerfile: Dockerfile
       args:
         build: ${build}
+    environment:
+      - FLASK_ENV=${build}
     ports: 
       - "5000:5000"
     volumes:

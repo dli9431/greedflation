@@ -13,7 +13,7 @@ COPY dev-requirements.txt .
 
 # setup virtual environment and install dependencies
 RUN python -m venv venv && \
-    if [ "$build" = "production" ]; then \
+    if [ "$build" = "prod" ]; then \
         venv/bin/pip install --trusted-host pypi.python.org -r requirements.txt; \
     else \
         venv/bin/pip install --trusted-host pypi.python.org -r dev-requirements.txt; \
@@ -23,8 +23,8 @@ RUN python -m venv venv && \
 COPY . /app
 
 # Run Scrapy or pytest when container launches (if environment variable is set)
-CMD if [ "$BUILD_ENV" = "production" ]; then \
-        /app/venv/bin/scrapy crawl initspider; \
-    else \
+CMD if [ "$BUILD_ENV" = "test" ]; then \
         /app/venv/bin/pytest; \
+    else \
+        /app/venv/bin/scrapy crawl initspider; \
     fi

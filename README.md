@@ -11,15 +11,18 @@ https://docs.docker.com/compose/install/
 
 ---
 
-Building the scraper in dev (test) mode  
-build=development docker compose build scraper
+Environments  
+prod / dev / test
 
-Running scraper in test mode  
-build=development docker compose run --rm scraper
+Building + running scraper test container  
+build=test docker compose build scraper  
+build=test docker compose run --rm scraper
 
-Building the scraper in production mode  
-build=production docker compose build scraper
+Building + running scraper dev container  
+build=dev docker compose build scraper  
+build=dev docker compose run scraper
 
-Running the scraper in production mode  
-build=production docker compose run --rm scraper
+Building + running scraper prod container  
+build=prod docker compose build scraper  
+build=prod docker compose run scraper
 

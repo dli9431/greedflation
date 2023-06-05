@@ -11,15 +11,17 @@ ARG build
 COPY requirements.txt .
 COPY dev-requirements.txt .
 
-# setup virtual environment
-RUN python -m venv venv
-ENV PATH="/app/venv/bin:$PATH"
+# setup virtual environment and install dependencies
+RUN python -m venv /venv
+RUN /venv/bin/pip install --upgrade pip
+RUN if [ "$build" = "production" ]; then \
+        /venv/bin/pip install --trusted-host pypi.python.org -r requirements.txt; \
+    else \
+        /venv/bin/pip install --trusted-host pypi.python.org -r dev-requirements.txt; \
+    fi
 
-# Install any needed packages specified in requirements.txt
-RUN if [ "$build" = "production" ]; then pip install --trusted-host pypi.python.org -r requirements.txt; else pip install --trusted-host pypi.python.org -r dev-requirements.txt; fi
-
-# Copy the rest of the app code into the container
-COPY . ./app
+# Copy the current directory contents into the container at /app
+COPY . /app
 
 # Set the environment variable for the build
 ENV FLASK_ENV=${build}
@@ -28,4 +30,4 @@ ENV FLASK_ENV=${build}
 EXPOSE 5000
 
 # Define the command to run the app or tests when the container starts
-CMD ["sh", "-c", "if [ \"$FLASK_ENV\" = \"test\" ]; then pytest; else python app.py; fi"]
+CMD ["/bin/bash", "-c", "source /venv/bin/activate && if [ \"$FLASK_ENV\" = \"test\" ]; then pytest; else python app.py; fi"]
