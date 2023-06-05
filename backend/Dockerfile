@@ -14,7 +14,7 @@ COPY dev-requirements.txt .
 # setup virtual environment and install dependencies
 RUN python -m venv /venv
 RUN /venv/bin/pip install --upgrade pip
-RUN if [ "$build" = "production" ]; then \
+RUN if [ "$build" = "prod" ]; then \
         /venv/bin/pip install --trusted-host pypi.python.org -r requirements.txt; \
     else \
         /venv/bin/pip install --trusted-host pypi.python.org -r dev-requirements.txt; \
