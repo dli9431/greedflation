@@ -23,4 +23,4 @@ ENV NODE_ENV=${build}
 EXPOSE 3000
 
 # Define the command to start the server
-CMD if [ "$build" = "prod" ]; then npm run prod; elif [ "$build" = "dev" ]; then npm run dev; elif [ "$build" = "test" ]; then npm run test; else echo "Invalid build argument"; fi
+CMD if [ "$NODE_ENV" = "prod" ]; then npm run prod; elif [ "$NODE_ENV" = "dev" ]; then npm run dev; elif [ "$NODE_ENV" = "test" ]; then npm run test; else echo "Invalid build argument"; fi

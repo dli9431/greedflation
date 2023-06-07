@@ -6,9 +6,9 @@ module.exports = (env, argv) => {
 
 	return {
 		mode: isDevelopment ? 'development' : 'production',
-		entry: './src/index.js',
+		entry: './src/index.tsx',
 		output: {
-			filename: isDevelopment ? '[name].js' : '[name].[contenthash].js',
+			filename: isDevelopment ? '[name].ts' : '[name].[contenthash].ts',
 			path: path.resolve(__dirname, 'dist'),
 		},
 		devtool: isDevelopment ? 'eval-source-map' : false,
@@ -24,7 +24,7 @@ module.exports = (env, argv) => {
 		module: {
 			rules: [
 				{
-					test: /\.js$/,
+					test: /\.(js|jsx|ts|tsx)$/,
 					exclude: /node_modules/,
 					use: {
 						loader: 'babel-loader',
@@ -36,7 +36,17 @@ module.exports = (env, argv) => {
 						},
 					},
 				},
+				{
+					test: /\.tsx?$/,
+					exclude: /node_modules/,
+					use: {
+						loader: 'ts-loader',
+					},
+				},
 			],
+		},
+		resolve: {
+			extensions: ['.js', '.jsx', '.ts', '.tsx'],
 		},
 		plugins: [
 			new HtmlWebpackPlugin({
