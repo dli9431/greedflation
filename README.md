@@ -18,12 +18,12 @@ Containers
 scraper / backend / frontend  
 
 Build + running tests:  
-build=test docker compose build {container}  
-build=test docker compose run --rm {container}
+build=test docker-compose build {container}  
+build=test docker-compose run --rm {container}
 
 Building + running  
-build={env} docker compose build {container}  
-build={env} docker compose up -d {container}
+build={env} docker-compose build {container}  
+build={env} docker-compose up -d {container}
 
-Stopping container  
-build={env} docker compose down
+Stopping containers  
+build={env} docker-compose down

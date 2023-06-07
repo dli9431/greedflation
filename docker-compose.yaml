@@ -16,6 +16,8 @@ services:
       dockerfile: Dockerfile
       args:
         build: ${build}
+    environment:
+      - NODE_ENV=${build}
     ports:
       - "3000:3000"
     volumes:
