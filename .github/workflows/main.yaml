@@ -44,7 +44,8 @@ jobs:
       - name: Build and run backend
         run: |
           build=prod docker compose build backend
-          build=prod docker compose up backend
+          build=prod docker compose up -d backend
+          build=prod docker compose down
   scraper-deploy:
     needs: scraper-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -63,7 +64,8 @@ jobs:
       - name: Build and run scraper
         run: |
           build=prod docker compose build scraper
-          build=prod docker compose run --rm scraper  
+          build=prod docker compose up -d scraper
+          build=prod docker compose down
   scraper-test:
     runs-on: ubuntu-latest
     steps:
