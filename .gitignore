@@ -69,5 +69,13 @@ frontend/build/
 Thumbs.db
 
 # Cypress
-cypress/screenshots/
-cypress/videos/
+frontend/cypress/screenshots/
+frontend/cypress/videos/
+
+# TypeScript
+*.tsbuildinfo
+*.ts
+*.tsx
+
+# Webpack
+frontend/dist/
