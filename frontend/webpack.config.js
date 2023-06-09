@@ -8,7 +8,7 @@ module.exports = (env, argv) => {
 		mode: isDevelopment ? 'development' : 'production',
 		entry: './src/index.tsx',
 		output: {
-			filename: isDevelopment ? '[name].ts' : '[name].[contenthash].ts',
+			filename: isDevelopment ? '[name].js' : '[name].[contenthash].js',
 			path: path.resolve(__dirname, 'dist'),
 		},
 		devtool: isDevelopment ? 'eval-source-map' : false,
