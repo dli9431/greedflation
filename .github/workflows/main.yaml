@@ -9,6 +9,41 @@ on:
       - main
       - dev
 jobs:
+  frontend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Build + test frontend
+        run: |
+          build=test docker-compose build frontend
+          build=test docker-compose run --rm frontend
+  frontend-deploy:
+    needs: frontend-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: |
+          npm install
+      - name: Build and run frontend
+        run: |
+          build=prod docker-compose build frontend
+          build=prod docker-compose up -d frontend
+          build=prod docker-compose down
   backend-test:
     runs-on: ubuntu-latest
     steps:
@@ -24,8 +59,8 @@ jobs:
           if [ -f backend/dev-requirements.txt ]; then pip install -r backend/dev-requirements.txt; fi
       - name: Build + test backend
         run: |
-          build=test docker compose build backend
-          build=test docker compose run --rm backend
+          build=test docker-compose build backend
+          build=test docker-compose run --rm backend
   backend-deploy:
     needs: backend-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -43,9 +78,9 @@ jobs:
           if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
       - name: Build and run backend
         run: |
-          build=prod docker compose build backend
-          build=prod docker compose up -d backend
-          build=prod docker compose down
+          build=prod docker-compose build backend
+          build=prod docker-compose up -d backend
+          build=prod docker-compose down
   scraper-deploy:
     needs: scraper-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -63,9 +98,9 @@ jobs:
           if [ -f scraper/requirements.txt ]; then pip install -r scraper/requirements.txt; fi
       - name: Build and run scraper
         run: |
-          build=prod docker compose build scraper
-          build=prod docker compose up -d scraper
-          build=prod docker compose down
+          build=prod docker-compose build scraper
+          build=prod docker-compose up -d scraper
+          build=prod docker-compose down
   scraper-test:
     runs-on: ubuntu-latest
     steps:
@@ -83,5 +118,5 @@ jobs:
         if [ -f scraper/dev-requirements.txt ]; then pip install -r scraper/dev-requirements.txt; fi
     - name: Build + test scraper
       run: |
-        build=test docker compose build scraper
-        build=test docker compose run --rm scraper
+        build=test docker-compose build scraper
+        build=test docker-compose run --rm scraper
