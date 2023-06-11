@@ -21,9 +21,8 @@ Build + running tests:
 build=test docker-compose build {container}  
 build=test docker-compose run --rm {container}
 
-Building + running  
-build={env} docker-compose build {container}  
-build={env} docker-compose up -d {container}
+Building + running dev/prod  
+build={env} docker-compose up --build -d {container}
 
 Stopping containers  
 build={env} docker-compose down
