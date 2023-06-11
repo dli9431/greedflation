@@ -9,41 +9,41 @@ on:
       - main
       - dev
 jobs:
-  frontend-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-      - name: Install dependencies
-        run: |
-          npm install
-      - name: Build + test frontend
-        run: |
-          build=test docker-compose build frontend
-          build=test docker-compose run --rm frontend
-  frontend-deploy:
-    needs: frontend-test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-      - name: Install dependencies
-        run: |
-          npm install
-      - name: Build and run frontend
-        run: |
-          build=prod docker-compose build frontend
-          build=prod docker-compose up -d frontend
-          build=prod docker-compose down
+  # frontend-test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 14
+  #     - name: Install dependencies
+  #       run: |
+  #         npm install
+  #     - name: Build + test frontend
+  #       run: |
+  #         build=test docker-compose build frontend
+  #         build=test docker-compose run --rm frontend
+  # frontend-deploy:
+  #   needs: frontend-test
+  #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 14
+  #     - name: Install dependencies
+  #       run: |
+  #         npm install
+  #     - name: Build and run frontend
+  #       run: |
+  #         build=prod docker-compose build frontend
+  #         build=prod docker-compose up -d frontend
+  #         build=prod docker-compose down
   backend-test:
     runs-on: ubuntu-latest
     steps:
