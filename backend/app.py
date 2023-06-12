@@ -1,8 +1,29 @@
 from flask import Flask, jsonify
+from pymongo import MongoClient
+
 app = Flask(__name__)
+
+def get_db():
+    client = MongoClient('mongodb://db:27017/')
+    return client['testdb']
+
 @app.route('/')
 def home():
     return jsonify({'message': 'Welcome to my web app!'})
+
+@app.route('/setdata')
+def set_data():
+    db = get_db()
+    collection = db['testcol']
+    collection.insert_many([{'name': 'Joe', 'age': 35}, {'name': 'Janine', 'age': 45}])
+    return jsonify({'message': 'Data inserted successfully'})
+
+@app.route('/getdata')
+def get_dbdata():
+    db = get_db()
+    collection = db['testcol']
+    data = list(collection.find({}, {'_id': 0}))
+    return jsonify(data)
 
 @app.route('/data')
 def get_data():

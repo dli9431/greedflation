@@ -1,4 +1,8 @@
 services:
+  db:
+    build: ./db
+    ports:
+      - '27017:27017'
   scraper:
     build:
       context: ./scraper
