@@ -1,4 +1,4 @@
-# Scrapy settings for myproject project
+# Scrapy settings for greedflation project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -14,7 +14,7 @@ NEWSPIDER_MODULE = "spider.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "myproject (+http://www.yourdomain.com)"
+#USER_AGENT = "greedflation (+https://github.com/dli9431/greedflation/)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -45,13 +45,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "myproject.middlewares.MyprojectSpiderMiddleware": 543,
+#    "greedflation-scraper.middlewares.GreedflationSpiderMiddleware": 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    "myproject.middlewares.MyprojectDownloaderMiddleware": 543,
+#    "greedflation-scraper.middlewares.GreedflationDownloaderMiddleware": 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    "myproject.pipelines.MyprojectPipeline": 300,
+#    "greedflation-scraper.pipelines.GreedflationPipeline": 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
