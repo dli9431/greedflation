@@ -12,6 +12,10 @@ BOT_NAME = "greedflation-scraper"
 SPIDER_MODULES = ["spider.spiders"]
 NEWSPIDER_MODULE = "spider.spiders"
 
+ITEM_PIPELINES = {'greedflation-scraper.pipelines.GreedflationDBPipeline': 300,}
+
+MONGO_URI = 'mongodb://db:27017'  # Adjust this URI to fit your MongoDB instance
+MONGO_DATABASE = 'superstoredb'  # Use your MongoDB database
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "greedflation (+https://github.com/dli9431/greedflation/)"
