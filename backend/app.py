@@ -81,21 +81,15 @@ def delete_all(collection_name):
     else:
         return jsonify({'message': 'No documents found to delete'})  
     
-@app.route('/delete', methods=['GET'])
-def delete():
-    db = get_db()
-    collection = db['products']
-    result = collection.delete_many({})  # {} is used to match and delete all documents
-    if result.deleted_count > 0:
-        return jsonify({'message': f'{result.deleted_count} documents deleted successfully'})
-    else:
-        return jsonify({'message': 'No documents found to delete'})  
-    
 @app.route('/test', methods=['GET'])
 def test():
     db = get_db()
     collection = db['products']
-    return jsonify({'num': collection.count_documents({})})
+    prices = db['prices']
+    scraped = db['scraped']
+    return jsonify({'numProducts': collection.count_documents({}),
+                    'numPrices': prices.count_documents({}),
+                    'numScraped': scraped.count_documents({})})
 
 @app.route('/find/<string:collection_name>/<string:query>', methods=['GET'])
 def find_document(collection_name, query):

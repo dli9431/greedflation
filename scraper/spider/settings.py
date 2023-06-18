@@ -16,6 +16,7 @@ ITEM_PIPELINES = {'spider.pipelines.GreedflationDBPipeline': 300,}
 
 MONGO_URI = 'mongodb://db:27017'  # Adjust this URI to fit your MongoDB instance
 MONGO_DATABASE = 'superstoredb'  # Use your MongoDB database
+DONT_OBEY_ROBOTSTXT = 'false'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = "greedflation (+https://github.com/dli9431/greedflation/)"

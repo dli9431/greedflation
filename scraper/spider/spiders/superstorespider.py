@@ -1,7 +1,8 @@
 import json
 import scrapy
-from datetime import date
+from datetime import datetime
 from spider.items import ProductItem, PriceItem
+from pymongo import MongoClient
 
 
 class SuperstoreInitSpider(scrapy.Spider):
@@ -13,6 +14,11 @@ class SuperstoreInitSpider(scrapy.Spider):
 
     def parse(self, response):
         print(response.body)
+
+
+def get_db():
+    client = MongoClient('mongodb://db:27017/')
+    return client['superstoredb']
 
 
 class SuperstoreSpider(scrapy.Spider):
@@ -36,8 +42,10 @@ class SuperstoreSpider(scrapy.Spider):
     }
 
     def start_requests(self):
+        page_from = 0
+        page_size = 50
         payload = {
-            "pagination": {"from": 0, "size": 50},
+            "pagination": {"from": page_from, "size": page_size},
             "banner": "superstore",
             # generate this based on initial request later
             "cartId": "5d1f7722-6085-4f8e-b854-9bdd3e7d11ec",
@@ -49,7 +57,7 @@ class SuperstoreSpider(scrapy.Spider):
             "categoryId": "27998",
         }
         yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
-                             headers=self.headers, cb_kwargs=dict(payload=payload))
+                             headers=self.headers, cb_kwargs=dict(payload=payload, page_from=page_from, page_size=page_size))
 
     def parse(self, response, payload):
         data = json.loads(response.body)
@@ -67,12 +75,12 @@ class SuperstoreSpider(scrapy.Spider):
                 product_id=product['code'],
                 price=product['prices']['price']['value'],
                 type=product['prices']['price']['type'],
-                date=date.today()
+                date=datetime.utcnow()
             )
-            yield price_item
+            yield price_item, payload
 
         # Pagination logic
-        if data['results']:  # assuming that the presence of 'results' means there's more data
+        if data['results']:
             payload['pagination']['from'] += payload['pagination']['size']
             yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
                                  headers=self.headers, cb_kwargs=dict(payload=payload))
