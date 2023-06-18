@@ -11,8 +11,8 @@ services:
         build: ${build}
     environment:
       - BUILD_ENV=${build}
-    # volumes:
-    #   - ./scraper:/app
+    volumes:
+      - ./scraper:/app
   frontend:
     image: frontend
     build:

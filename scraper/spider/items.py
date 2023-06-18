@@ -8,8 +8,8 @@ import scrapy
 class ProductItem(scrapy.Item):
     product_id = scrapy.Field()
     name = scrapy.Field()
-    product_description = scrapy.Field()
     brand = scrapy.Field()
+    product_description = scrapy.Field()
     url = scrapy.Field()
     size = scrapy.Field() # grams
     calories = scrapy.Field() # kcal

@@ -26,8 +26,12 @@ COPY . /app
 # Set the environment variable for the build
 ENV FLASK_ENV=${build}
 
+# Set Flask specific environment variables
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
 # Make port 5000 available to the world outside this container
 EXPOSE 5000
 
 # Define the command to run the app or tests when the container starts
-CMD ["/bin/bash", "-c", "source /venv/bin/activate && if [ \"$FLASK_ENV\" = \"test\" ]; then pytest; else python app.py; fi"]
+CMD ["/bin/bash", "-c", "source /venv/bin/activate && if [ \"$FLASK_ENV\" = \"test\" ]; then pytest; elif [ \"$FLASK_ENV\" = \"dev\" ]; then flask run --debugger --reload; else flask run; fi"]
