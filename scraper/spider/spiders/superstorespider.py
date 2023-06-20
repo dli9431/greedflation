@@ -1,6 +1,6 @@
 import json
 import scrapy
-from datetime import datetime
+from datetime import datetime, timedelta
 from spider.items import ProductItem, PriceItem
 from pymongo import MongoClient
 
@@ -28,11 +28,24 @@ class SuperstoreSpider(scrapy.Spider):
         self.db = self.client['superstoredb']
         self.collection_name_scraped = "scraped"
 
-    def has_been_scraped(self, url, payload):
+    def has_been_scraped(self, url, payload, hours=24):
         pagination_from = payload['pagination']['from']
         pagination_size = payload['pagination']['size']
-        return self.db[self.collection_name_scraped].count_documents(
-            {'url': url, 'pagination_from': pagination_from, 'pagination_size': pagination_size}) > 0
+        
+        # X hours before the current time
+        x_hours_ago = datetime.utcnow() - timedelta(hours=hours)
+
+        # Search for a document with the given URL and pagination inserted within the past X hours
+        document = self.db[self.collection_name_scraped].find_one({
+            'url': url,
+            'pagination_from': pagination_from,
+            'pagination_size': pagination_size,
+            'timestamp': {'$gte': x_hours_ago}
+        })
+
+        # If a document is found, return True, indicating the page has already been scraped
+        # within the past X hours. Otherwise, return False.
+        return bool(document)
 
     def mark_as_scraped(self, url, payload):
         pagination_from = payload['pagination']['from']
