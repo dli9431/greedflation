@@ -4,21 +4,9 @@ from datetime import datetime, timedelta
 from spider.items import ProductItem, PriceItem
 import pymongo
 
-class SuperstoreInitSpider(scrapy.Spider):
-    name = 'init_superstore_spider'
-    url = 'https://www.realcanadiansuperstore.ca/food/meat/c/27998?navid=flyout-L2-Meat'
-
-    def start_requests(self):
-        yield scrapy.Request(self.url, callback=self.parse)
-
-    def parse(self, response):
-        print(response.body)
-
-
 def get_db():
     client = pymongo.MongoClient('mongodb://db:27017/')
     return client['superstoredb']
-
 
 class SuperstoreSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
@@ -53,7 +41,7 @@ class SuperstoreSpider(scrapy.Spider):
             {'url': url, 'pagination_from': pagination_from,
              'pagination_size': pagination_size, 'timestamp': datetime.utcnow()})
 
-    name = 'superstore_spider'
+    name = 'superstore'
     url = 'https://api.pcexpress.ca/product-facade/v3/products/category/listing'
     headers = {
         "Accept": "application/json, text/plain, */*",
