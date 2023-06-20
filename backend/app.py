@@ -65,11 +65,12 @@ def get_dbdata():
     # data = list(products.find({}, {'_id': 0}))
     # return jsonify(data)
 
-@app.route('/data')
-def get_data():
-    # Retrieve data from your data store here
-    data = [{'name': 'John', 'age': 30}, {'name': 'Jane', 'age': 25}]
-    return jsonify(data)
+# return all documents from scraped collection
+@app.route('/scraped')
+def scraped():
+    db = get_db()
+    docs = db['scraped'].find({}, {'_id': 0})
+    return jsonify(list(docs))
 
 @app.route('/delete_all/<string:collection_name>', methods=['DELETE'])
 def delete_all(collection_name):

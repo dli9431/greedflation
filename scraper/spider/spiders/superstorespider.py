@@ -22,6 +22,25 @@ def get_db():
 
 
 class SuperstoreSpider(scrapy.Spider):
+    def __init__(self, *args, **kwargs):
+        super(SuperstoreSpider, self).__init__(*args, **kwargs)
+        self.client = MongoClient('mongodb://db:27017/')
+        self.db = self.client['superstoredb']
+        self.collection_name_scraped = "scraped"
+
+    def has_been_scraped(self, url, payload):
+        pagination_from = payload['pagination']['from']
+        pagination_size = payload['pagination']['size']
+        return self.db[self.collection_name_scraped].count_documents(
+            {'url': url, 'pagination_from': pagination_from, 'pagination_size': pagination_size}) > 0
+
+    def mark_as_scraped(self, url, payload):
+        pagination_from = payload['pagination']['from']
+        pagination_size = payload['pagination']['size']
+        self.db[self.collection_name_scraped].insert_one(
+            {'url': url, 'pagination_from': pagination_from,
+             'pagination_size': pagination_size, 'timestamp': datetime.utcnow()})
+
     name = 'superstore_spider'
     url = 'https://api.pcexpress.ca/product-facade/v3/products/category/listing'
     headers = {
@@ -56,8 +75,9 @@ class SuperstoreSpider(scrapy.Spider):
             "offerType": "ALL",
             "categoryId": "27998",
         }
-        yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
-                             headers=self.headers, cb_kwargs=dict(payload=payload, page_from=page_from, page_size=page_size))
+        if not self.has_been_scraped(self.url, payload):
+            yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
+                                 headers=self.headers, cb_kwargs=dict(payload=payload))
 
     def parse(self, response, payload):
         data = json.loads(response.body)
@@ -77,10 +97,14 @@ class SuperstoreSpider(scrapy.Spider):
                 type=product['prices']['price']['type'],
                 date=datetime.utcnow()
             )
-            yield price_item, payload
+            yield price_item
+
+        # Mark page as scraped
+        self.mark_as_scraped(self.url, payload)
 
         # Pagination logic
         if data['results']:
-            payload['pagination']['from'] += payload['pagination']['size']
-            yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
-                                 headers=self.headers, cb_kwargs=dict(payload=payload))
+            payload['pagination']['from'] += 1
+            if not self.has_been_scraped(self.url, payload):
+                yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
+                                     headers=self.headers, cb_kwargs=dict(payload=payload))
