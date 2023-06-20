@@ -19,14 +19,6 @@ def get_db():
 def home():
     return jsonify({'message': 'Welcome to my web app!'})
 
-@app.route('/setdata')
-def set_data():
-    db = get_db()
-    collection = db['testcol']
-    collection.insert_many([{'name': 'Joe', 'age': 35}, {
-                           'name': 'Janine', 'age': 45}])
-    return jsonify({'message': 'Data inserted successfully'})
-
 @app.route('/getdata')
 def get_dbdata():
     db = get_db()
@@ -36,15 +28,15 @@ def get_dbdata():
         {
             '$lookup': {
                 'from': 'prices',
-                'localField': 'product_id',
-                'foreignField': 'product_id',
+                'localField': 'product_code',
+                'foreignField': 'product_code',
                 'as': 'prices'
             }
         },
         {
             '$project': {
                 '_id': 0,
-                'product_id': 1,
+                'product_code': 1,
                 'name': 1,
                 'brand': 1,
                 'url': 1,
@@ -65,11 +57,37 @@ def get_dbdata():
     # data = list(products.find({}, {'_id': 0}))
     # return jsonify(data)
 
+@app.route('/duplicates/<string:collection_name>')
+def duplicates(collection_name):
+    db = get_db()
+    collection = db[collection_name]
+    pipeline = [
+        {'$group': {'_id': '$product_code', 'count': {'$sum': 1}}},
+        {'$match': {'count': {'$gt': 1}}}
+    ]
+    duplicates = list(collection.aggregate(pipeline))
+    if duplicates:
+        return jsonify(duplicates)
+    else:
+        return jsonify({'message': f'No duplicates found in {collection_name} collection'})
+    
+@app.route('/products')
+def products():
+    db = get_db()
+    docs = list(db['products'].find({}, {'_id': 0}))
+    return jsonify(docs)
+
 # return all documents from scraped collection
 @app.route('/scraped')
 def scraped():
     db = get_db()
     docs = db['scraped'].find({}, {'_id': 0})
+    return jsonify(list(docs))
+
+@app.route('/prices')
+def prices():
+    db = get_db()
+    docs = db['prices'].find({}, {'_id': 0})
     return jsonify(list(docs))
 
 @app.route('/delete_all/<string:collection_name>', methods=['DELETE'])
@@ -96,7 +114,7 @@ def test():
 def find_document(collection_name, query):
     db = get_db()
     collection = db[collection_name]
-    result = collection.find_one({'product_id': query})
+    result = collection.find_one({'product_code': query})
     print(result)
     if result:
         return jsonify(result)

@@ -2,8 +2,7 @@ import json
 import scrapy
 from datetime import datetime, timedelta
 from spider.items import ProductItem, PriceItem
-from pymongo import MongoClient
-
+import pymongo
 
 class SuperstoreInitSpider(scrapy.Spider):
     name = 'init_superstore_spider'
@@ -17,18 +16,18 @@ class SuperstoreInitSpider(scrapy.Spider):
 
 
 def get_db():
-    client = MongoClient('mongodb://db:27017/')
+    client = pymongo.MongoClient('mongodb://db:27017/')
     return client['superstoredb']
 
 
 class SuperstoreSpider(scrapy.Spider):
     def __init__(self, *args, **kwargs):
         super(SuperstoreSpider, self).__init__(*args, **kwargs)
-        self.client = MongoClient('mongodb://db:27017/')
+        self.client = pymongo.MongoClient('mongodb://db:27017/')
         self.db = self.client['superstoredb']
         self.collection_name_scraped = "scraped"
 
-    def has_been_scraped(self, url, payload, hours=24):
+    def has_been_scraped(self, url, payload, hours=.01667): # set to 1 minute for testing purposes
         pagination_from = payload['pagination']['from']
         pagination_size = payload['pagination']['size']
         
@@ -96,21 +95,52 @@ class SuperstoreSpider(scrapy.Spider):
         data = json.loads(response.body)
         for product in data['results']:
             product_item = ProductItem(
-                product_id=product['code'],
+                product_code=product['code'],
                 name=product['name'],
                 brand=product['brand'],
                 # product_description=product['description'],
                 url=product['link'],
                 size=product['packageSize']
             )
-            yield product_item
+
+            # Check if the product already exists in the database
+            existing_product = self.db.products.find_one({"product_code": product_item["product_code"]})
+            
+            if not existing_product:
+                # Insert a new product document
+                self.db.products.insert_one(dict(product_item))
+
             price_item = PriceItem(
-                product_id=product['code'],
+                product_code=product['code'],
                 price=product['prices']['price']['value'],
                 type=product['prices']['price']['type'],
                 date=datetime.utcnow()
             )
-            yield price_item
+
+            # Check if the price already exists in the database
+            existing_product_price = self.db.prices.find_one({"product_code": price_item["product_code"]})
+
+            # If product doesn't exist in the price collection
+            if not existing_product_price:
+                # Insert a new price document
+                self.db.prices.insert_one(dict(price_item))
+
+            # If product does exist in the price collection
+            else:
+                # Find the most recent price entry for this product
+                last_price = self.db.prices.find_one({"product_code": price_item["product_code"]}, sort=[("date", pymongo.DESCENDING)])
+
+                # Check if the price has changed since the last scrape
+                if last_price["price"] != price_item["price"]:
+                    # If the price has changed, insert a new price document
+                    self.db.prices.insert_one(dict(price_item))
+
+                else:
+                    # If the price has not changed, check if the existing date is older than 24 hours
+                    time_difference = datetime.utcnow() - last_price["date"]
+                    if time_difference.total_seconds() >= 24*60*60:  # if difference is more than 24 hours
+                        # If existing date is older than 24 hours, insert a new record
+                        self.db.prices.insert_one(dict(price_item))
 
         # Mark page as scraped
         self.mark_as_scraped(self.url, payload)

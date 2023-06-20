@@ -6,7 +6,7 @@
 import scrapy
 
 class ProductItem(scrapy.Item):
-    product_id = scrapy.Field()
+    product_code = scrapy.Field()
     name = scrapy.Field()
     brand = scrapy.Field()
     product_description = scrapy.Field()
@@ -18,7 +18,7 @@ class ProductItem(scrapy.Item):
     fat = scrapy.Field() # grams
 
 class PriceItem(scrapy.Item):
-    product_id = scrapy.Field()
+    product_code = scrapy.Field()
     price = scrapy.Field()
     type = scrapy.Field() # regular, special, etc.
     date = scrapy.Field()
