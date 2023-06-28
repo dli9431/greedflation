@@ -2,8 +2,8 @@ import json
 import pytest
 from unittest.mock import MagicMock, patch
 from scrapy.http import TextResponse
-from ..spider.spiders.superstorespider import SuperstoreSpider
-from ..spider.spiders.payload import generate_payload
+from spider.spiders.superstorespider import SuperstoreSpider
+from spider.spiders.payload import generate_payload
 
 
 @pytest.fixture
@@ -40,14 +40,12 @@ def test_mark_as_scraped(spider):
     spider.db[spider.collection_name_scraped].insert_one.assert_called_once()
 
 
-@patch('spider.spiders.superstorespider.SuperstoreSpider.has_been_scraped')
 @patch('spider.spiders.superstorespider.SuperstoreSpider.parse')
 def test_parse(mock_parse, spider):
     spider = SuperstoreSpider()
     mock_has_been_scraped = MagicMock(return_value=False)
     spider.has_been_scraped = mock_has_been_scraped
-    
-    print('test_parse')
+
     # Test that parse method is called with a valid response object
     url = 'https://example.com'
     payload = generate_payload(1, 0)
@@ -71,12 +69,9 @@ def test_parse(mock_parse, spider):
     # Updated assertion line
     assert request.body.decode('utf-8') == json.dumps(payload)
 
-    print(request.body.decode('utf-8'))
-    print(json.dumps(payload))
-
     # Call the callback function with the response
     spider.parse(response, payload)
 
     # Check if parse method was called
     assert mock_parse.call_count == 1
-    mock_parse.assert_called_once_with(spider, response, payload)
+    mock_parse.assert_called_once_with(response, payload)

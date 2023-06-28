@@ -1,15 +1,10 @@
-import sys
-import os
-
-# Add the directory containing the payload.py file to the Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 import json
 import scrapy
 from datetime import datetime, timedelta
 from spider.items import ProductItem, PriceItem
 import pymongo
-import payload as pyld
+from . import payload as pyld
+
 
 def get_db():
     client = pymongo.MongoClient('mongodb://db:27017/')
