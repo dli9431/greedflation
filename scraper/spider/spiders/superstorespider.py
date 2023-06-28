@@ -24,7 +24,6 @@ class SuperstoreSpider(scrapy.Spider):
 
     # set to 1 minute for testing purposes
     def has_been_scraped(self, url, payload, hours=.01667):
-        print('has_been_scraped')
         pagination_from = payload['pagination']['from']
         pagination_size = payload['pagination']['size']
 
@@ -42,10 +41,8 @@ class SuperstoreSpider(scrapy.Spider):
         # If a document is found, return True, indicating the page has already been scraped
         # within the past X hours. Otherwise, return False.
         if document is None:
-            print('has_been_scraped: False')
             return False
         else:
-            print('has_been_scraped: True')
             return True
 
     def mark_as_scraped(self, url, payload):
@@ -56,8 +53,7 @@ class SuperstoreSpider(scrapy.Spider):
              'pagination_size': pagination_size, 'timestamp': datetime.utcnow()})
 
     def start_requests(self):
-        print('start_requests')
-        payload = pyld.generate_payload(1, 0)
+        payload = pyld.generate_payload(50, 0)
 
         if not self.has_been_scraped(self.url, payload):
             yield scrapy.Request(

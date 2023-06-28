@@ -32,7 +32,6 @@ def test_has_been_scraped(spider):
 
 
 def test_mark_as_scraped(spider):
-    print('test_mark_as_scraped')
     # Test that mark_as_scraped inserts a new document into the database
     spider.db[spider.collection_name_scraped].insert_one = MagicMock()
     spider.mark_as_scraped('https://example.com',
