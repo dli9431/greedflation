@@ -27,8 +27,8 @@ class SuperstoreProductsSpider(scrapy.Spider):
         # Find documents without the 'scraped_nutrition' field
         query = {'scraped_nutrition': {'$exists': False}}
         documents = self.products.find(query)
-
-    # Extract the URLs and create start URLs for scraping
+    
+        # Extract the URLs and create start URLs for scraping
         for document in documents:
             if document:
                 req = self.url + \
@@ -58,27 +58,37 @@ class SuperstoreProductsSpider(scrapy.Spider):
             nutrition_info = nutrition_facts[0]
 
             # Extract specific fields from the nutrition info and assign them to the item
-            calories_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['calories']['valueInGram'])
+            calories_match = None
+            if nutrition_info.get('calories'):
+                calories_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['calories']['valueInGram'])
             if calories_match:
                 item['calories'] = float(calories_match.group(1))
                 item['calories_unit'] = calories_match.group(2)
-            
-            fat_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalFat']['valueInGram'])
+
+            fat_match = None
+            if nutrition_info.get('totalFat'):
+                fat_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalFat']['valueInGram'])
             if fat_match:
                 item['fat'] = float(fat_match.group(1))
                 item['fat_unit'] = fat_match.group(2)
 
-            carbs_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalCarbohydrate']['valueInGram'])
+            carbs_match = None
+            if nutrition_info.get('totalCarbohydrate'):
+                carbs_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalCarbohydrate']['valueInGram'])
             if carbs_match:
                 item['carbs'] = float(carbs_match.group(1))
                 item['carbs_unit'] = carbs_match.group(2)
 
-            protein_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['protein']['valueInGram'])
+            protein_match = None
+            if nutrition_info.get('protein'):
+                protein_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['protein']['valueInGram'])
             if protein_match:
                 item['protein'] = float(protein_match.group(1))
                 item['protein_unit'] = protein_match.group(2)
 
-            serving_size_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['topNutrition'][0]['valueInGram'])
+            serving_size_match = None
+            if nutrition_info.get('topNutrition') and nutrition_info['topNutrition'][0].get('valueInGram'):
+                serving_size_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['topNutrition'][0]['valueInGram'])
             if serving_size_match:
                 item['serving_size'] = float(serving_size_match.group(1))
                 item['serving_size_unit'] = serving_size_match.group(2)
