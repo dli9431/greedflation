@@ -43,12 +43,12 @@ class SuperstoreProductsSpider(scrapy.Spider):
     def parse(self, response, item):
         data = json.loads(response.body)
         
-        # # Extract ingredients
+        # Extract ingredients
         item['ingredients'] = data.get('ingredients')
-        match = re.match(r'^([\d\.]+)\s*(\w+)$', data.get('packageSize'))
-        if match:
-            item['size'] = float(match.group(1))
-            item['size_unit'] = match.group(2)
+        match_size = re.match(r'^([\d\.]+)\s*(\w+)$', data.get('packageSize'))
+        if match_size:
+            item['size'] = float(match_size.group(1))
+            item['size_unit'] = match_size.group(2)
         
         # Extract the nutrition facts section
         nutrition_facts = data.get('nutritionFacts', [])
@@ -58,12 +58,31 @@ class SuperstoreProductsSpider(scrapy.Spider):
             nutrition_info = nutrition_facts[0]
 
             # Extract specific fields from the nutrition info and assign them to the item
-            item['calories'] = float([part for part in nutrition_info['calories']['valueInGram'].split(' ') if part.isdigit()][0])
-            item['fat'] = float([part for part in nutrition_info['totalFat']['valueInGram'].split(' ') if part.isdigit()][0])
-            item['carbs'] = float([part for part in nutrition_info['totalCarbohydrate']['valueInGram'].split(' ') if part.isdigit()][0])
-            item['protein'] = float([part for part in nutrition_info['protein']['valueInGram'].split(' ') if part.isdigit()][0])
-            item['serving_size'] = float([part for part in nutrition_info['topNutrition'][0]['valueInGram'].split(' ') if part.isdigit()][0])
-        
+            calories_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['calories']['valueInGram'])
+            if calories_match:
+                item['calories'] = float(calories_match.group(1))
+                item['calories_unit'] = calories_match.group(2)
+            
+            fat_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalFat']['valueInGram'])
+            if fat_match:
+                item['fat'] = float(fat_match.group(1))
+                item['fat_unit'] = fat_match.group(2)
+
+            carbs_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalCarbohydrate']['valueInGram'])
+            if carbs_match:
+                item['carbs'] = float(carbs_match.group(1))
+                item['carbs_unit'] = carbs_match.group(2)
+
+            protein_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['protein']['valueInGram'])
+            if protein_match:
+                item['protein'] = float(protein_match.group(1))
+                item['protein_unit'] = protein_match.group(2)
+
+            serving_size_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['topNutrition'][0]['valueInGram'])
+            if serving_size_match:
+                item['serving_size'] = float(serving_size_match.group(1))
+                item['serving_size_unit'] = serving_size_match.group(2)
+            
         item['scraped_nutrition'] = True
         # Update the document in the database
         query = {'_id': item['_id']}
