@@ -12,10 +12,12 @@ class ProductItem(scrapy.Item):
     product_description = scrapy.Field()
     url = scrapy.Field()
     size = scrapy.Field() # grams
+    serving = scrapy.Field() # grams
     calories = scrapy.Field() # kcal
     protein = scrapy.Field() # grams
     carbs = scrapy.Field() # grams
     fat = scrapy.Field() # grams
+    ingredients = scrapy.Field() # ingredients
 
 class PriceItem(scrapy.Item):
     product_code = scrapy.Field()

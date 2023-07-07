@@ -6,6 +6,11 @@ WORKDIR /app
 
 # Add ARG for build
 ARG build
+ARG spider_name
+
+# Set ENV for runtime
+ENV SPIDER_ENV=$spider_name
+ENV BUILD_ENV=$build
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -26,5 +31,5 @@ COPY . /app
 CMD if [ "$BUILD_ENV" = "test" ]; then \
         /bin/bash -c "source /venv/bin/activate && python -m pytest"; \
     else \
-        /bin/bash -c "source /venv/bin/activate && python -m scrapy crawl superstore_spider"; \
+        /bin/bash -c "source /venv/bin/activate && python -m scrapy crawl $SPIDER_ENV"; \
     fi

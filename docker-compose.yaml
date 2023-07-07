@@ -9,8 +9,10 @@ services:
       dockerfile: Dockerfile
       args:
         build: ${build}
+        spider_name: ${SPIDER_NAME:-superstore_spider}
     environment:
       - BUILD_ENV=${build}
+      - SPIDER_ENV=${SPIDER_NAME:-superstore_spider}
     volumes:
       - ./scraper:/app
   frontend:

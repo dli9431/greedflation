@@ -106,7 +106,8 @@ def test():
     collection = db['products']
     prices = db['prices']
     scraped = db['scraped']
-    return jsonify({'numProducts': collection.count_documents({}),
+    return jsonify({'db': db.name,},
+                    {'numProducts': collection.count_documents({}),
                     'numPrices': prices.count_documents({}),
                     'numScraped': scraped.count_documents({})})
 
