@@ -17,6 +17,9 @@ prod / dev / test
 Containers  
 scraper / backend / frontend  
 
+Running specific spider
+build={env} spider_name={spider_name} docker-compose run --rm scraper
+
 Build + running tests:  
 build=test docker-compose build {container}  
 build=test docker-compose run --rm {container}
