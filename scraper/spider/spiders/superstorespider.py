@@ -25,10 +25,8 @@ class SuperstoreProductsSpider(scrapy.Spider):
 
     def start_requests(self):
         # Find documents without the 'scraped_nutrition' field
-        # query = {'scraped_nutrition': {'$exists': False}}
-        # documents = self.products.find(query)
-        
-        documents = self.products.find()
+        query = {'scraped_nutrition': {'$exists': False}}
+        documents = self.products.find(query)
 
     # Extract the URLs and create start URLs for scraping
         for document in documents:

@@ -70,7 +70,14 @@ def duplicates(collection_name):
         return jsonify(duplicates)
     else:
         return jsonify({'message': f'No duplicates found in {collection_name} collection'})
-    
+
+@app.route('/change')
+def change():
+    db = get_db()
+    collection = db['products']
+    result = collection.update_many({}, {'$rename': {'servings': 'serving_size'}})
+    return jsonify({'message': f'{result.modified_count} documents updated successfully'})
+
 @app.route('/products')
 def products():
     db = get_db()

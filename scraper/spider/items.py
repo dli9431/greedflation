@@ -13,7 +13,8 @@ class ProductItem(scrapy.Item):
     url = scrapy.Field()
     size = scrapy.Field() # float
     size_unit = scrapy.Field() # grams, kg, ml, etc.
-    serving_size = scrapy.Field() # serving size, grams for now
+    serving_size = scrapy.Field() # float
+    serving_size_unit = scrapy.Field() # serving size unit
     calories = scrapy.Field() # kcal
     protein = scrapy.Field() # grams
     carbs = scrapy.Field() # grams
