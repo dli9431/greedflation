@@ -1,3 +1,4 @@
+from datetime import datetime
 from bson import ObjectId
 from json import JSONEncoder
 from flask import Flask, jsonify, request
@@ -40,7 +41,6 @@ def get_dbdata():
                 'name': 1,
                 'brand': 1,
                 'url': 1,
-                'size': 1,
                 'product_description': 1,
                 'calories': 1,
                 'protein': 1,
@@ -48,14 +48,14 @@ def get_dbdata():
                 'fat': 1,
                 'prices.price': 1,
                 'prices.date': 1,
-                'prices.comparison_price': 1
+                'prices.comparison_price': 1,
+                'prices.size': 1,
+                'prices.size_unit': 1,
             }
         }
     ]
     data = list(products.aggregate(pipeline))
     return jsonify(data)
-    # data = list(products.find({}, {'_id': 0}))
-    # return jsonify(data)
 
 @app.route('/duplicates/<string:collection_name>')
 def duplicates(collection_name):
@@ -75,7 +75,7 @@ def duplicates(collection_name):
 def change():
     db = get_db()
     collection = db['products']
-    result = collection.update_many({}, {'$rename': {'servings': 'serving_size'}})
+    result = collection.update_many({}, {'$unset': {'servings': 1}})
     return jsonify({'message': f'{result.modified_count} documents updated successfully'})
 
 @app.route('/products')

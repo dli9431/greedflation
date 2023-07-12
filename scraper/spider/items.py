@@ -11,8 +11,8 @@ class ProductItem(scrapy.Item):
     brand = scrapy.Field()
     product_description = scrapy.Field()
     url = scrapy.Field()
-    size = scrapy.Field() # float
-    size_unit = scrapy.Field() # g, kg, ml, etc
+    # size = scrapy.Field() # float
+    # size_unit = scrapy.Field() # g, kg, ml, etc
     serving_size = scrapy.Field() # float
     serving_size_unit = scrapy.Field()
     calories = scrapy.Field() # float
@@ -23,10 +23,14 @@ class ProductItem(scrapy.Item):
     carbs_unit = scrapy.Field()
     fat = scrapy.Field() # float
     fat_unit = scrapy.Field()
+    fiber = scrapy.Field() # float
+    fiber_unit = scrapy.Field()
     ingredients = scrapy.Field() # ingredients
 
 class PriceItem(scrapy.Item):
     product_code = scrapy.Field()
     price = scrapy.Field()
+    size = scrapy.Field()
+    size_unit = scrapy.Field()
     type = scrapy.Field() # regular, special, etc.
     date = scrapy.Field()
