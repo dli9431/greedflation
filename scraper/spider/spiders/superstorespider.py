@@ -106,32 +106,52 @@ class SuperstoreProductsSpider(scrapy.Spider):
         self.prices = self.db['prices']
 
     def start_requests(self):       
-        # Find documents without the 'scraped_nutrition' field
-        query = {'scraped_nutrition': {'$exists': False}}
-        documents = self.products.find(query)
+        query = {'product_code': '21098010_KG'}
+        document = self.products.find_one(query)
+        if (document):
+            projection = {'_id': 0, 'price': 1, 'size': 1, 'size_unit': 1, 'type': 1, 'date': 1}
+            sort = [('date', pymongo.DESCENDING)]
+            price_item = self.prices.find_one(query, projection=projection, sort=sort)
+
+            if price_item:
+                document['price'] = price_item['price']
+                document['size'] = price_item['size']
+                document['size_unit'] = price_item['size_unit']
+
+            req = self.url + \
+                pyld.generate_product_payload(document['product_code'])           
+            yield scrapy.Request(
+                req,
+                method='GET',
+                headers=self.headers,
+                cb_kwargs=dict(item=document)
+            )
+        # # Find documents without the 'scraped_nutrition' field
+        # query = {'scraped_nutrition': {'$exists': False}}
+        # documents = self.products.find(query)
     
-        # Extract the URLs and create start URLs for scraping
-        for document in documents:
-            if document:
-                query = {'product_code': document['product_code']}
-                projection = {'_id': 0, 'price': 1, 'size': 1, 'size_unit': 1, 'type': 1, 'date': 1}
-                sort = [('date', pymongo.DESCENDING)]
-                price_item = self.prices.find_one(query, projection=projection, sort=sort)
+        # # Extract the URLs and create start URLs for scraping
+        # for document in documents:
+        #     if document:
+        #         query = {'product_code': document['product_code']}
+        #         projection = {'_id': 0, 'price': 1, 'size': 1, 'size_unit': 1, 'type': 1, 'date': 1}
+        #         sort = [('date', pymongo.DESCENDING)]
+        #         price_item = self.prices.find_one(query, projection=projection, sort=sort)
 
-                # Assign the price fields to the ProductItem
-                if price_item:
-                    document['price'] = price_item['price']
-                    document['size'] = price_item['size']
-                    document['size_unit'] = price_item['size_unit']
+        #         # Assign the price fields to the ProductItem
+        #         if price_item:
+        #             document['price'] = price_item['price']
+        #             document['size'] = price_item['size']
+        #             document['size_unit'] = price_item['size_unit']
 
-                req = self.url + \
-                    pyld.generate_product_payload(document['product_code'])           
-                yield scrapy.Request(
-                    req,
-                    method='GET',
-                    headers=self.headers,
-                    cb_kwargs=dict(item=document)
-                )
+        #         req = self.url + \
+        #             pyld.generate_product_payload(document['product_code'])           
+        #         yield scrapy.Request(
+        #             req,
+        #             method='GET',
+        #             headers=self.headers,
+        #             cb_kwargs=dict(item=document)
+        #         )
 
     def parse(self, response, item):
         if (response.status != 404):
@@ -214,8 +234,8 @@ class SuperstoreProductsSpider(scrapy.Spider):
                     item['total_calories'] = total['total_calories']
                     item['total_servings'] = total['total_servings']
                     
-                    # If we've done all the calculations on nutrition data set scraped_nutrition to True
-                    item['scraped_nutrition'] = True
+                # If we've done all the calculations on nutrition data set scraped_nutrition to True
+                item['scraped_nutrition'] = True
 
         # If item has no nutrition data, set scraped_nutrition to False
         item['scraped_nutrition'] = False

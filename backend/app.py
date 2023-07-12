@@ -23,7 +23,7 @@ def home():
     return jsonify({'message': 'Welcome to my web app!'})
 
 @app.route('/api/get_all')
-def get_dbdata():
+def get_all():
     db = get_db()
     products = db['products']
     prices = db['prices']
@@ -43,16 +43,27 @@ def get_dbdata():
                 'name': 1,
                 'brand': 1,
                 'url': 1,
-                'product_description': 1,
+                # 'product_description': 1,
                 'calories': 1,
-                'protein': 1,
-                'carbs': 1,
+                'calories_unit': 1,
+                'carb': 1,
+                'carb_unit': 1,
                 'fat': 1,
+                'fat_unit': 1,
+                'fiber': 1,
+                'fiber_unit': 1,
+                'protein': 1,
+                'protein_unit': 1,
+                'serving_size': 1,
+                'serving_size_unit': 1,
+                'scraped_nutrition': 1,
                 'prices.price': 1,
                 'prices.date': 1,
                 'prices.comparison_price': 1,
                 'prices.size': 1,
                 'prices.size_unit': 1,
+                'total_protein': 1,
+                'price_per_protein': 1
             }
         }
     ]
