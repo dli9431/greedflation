@@ -47,7 +47,7 @@ def test_parse(mock_parse, spider):
 
     # Test that parse method is called with a valid response object
     url = 'https://example.com'
-    payload = generate_payload(1, 0)
+    payload = generate_payload(50, 0)
     response_body = '{"key": "value"}'
     headers = {'Content-Type': 'application/json'}
 

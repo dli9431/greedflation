@@ -12,7 +12,13 @@ def test_home(client):
     assert response.status_code == 200
     assert response.json == {'message': 'Welcome to my web app!'}
 
-def test_get_data(client):
-    response = client.get('/data')
+def test_get_all(client):
+    response = client.get('/api/get_all')
     assert response.status_code == 200
-    assert response.json == [{'name': 'John', 'age': 30}, {'name': 'Jane', 'age': 25}]
+    data = json.loads(response.data)
+    assert isinstance(data, list)
+    assert len(data) > 0
+    assert all('product_code' in item for item in data)
+    assert all('name' in item for item in data)
+    assert all('brand' in item for item in data)
+    assert all('url' in item for item in data)
