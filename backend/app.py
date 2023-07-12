@@ -3,8 +3,10 @@ from bson import ObjectId
 from json import JSONEncoder
 from flask import Flask, jsonify, request
 from pymongo import MongoClient
+from flask_cors import CORS
 
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
@@ -20,7 +22,7 @@ def get_db():
 def home():
     return jsonify({'message': 'Welcome to my web app!'})
 
-@app.route('/getdata')
+@app.route('/api/get_all')
 def get_dbdata():
     db = get_db()
     products = db['products']

@@ -2,3 +2,4 @@ Flask==2.3.2
 pymongo==4.3.3
 gspread==5.9.0
 google-auth==2.18.0
+flask-cors==4.0.0
