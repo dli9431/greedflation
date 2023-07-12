@@ -67,3 +67,9 @@ Thumbs.db
 screenshots/
 videos/
 downloads/
+
+# Ignore MongoDB generated files
+*.wt
+*.mdb
+*.lock
+*.bson
