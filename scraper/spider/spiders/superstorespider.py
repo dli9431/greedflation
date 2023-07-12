@@ -310,14 +310,18 @@ class SuperstoreSpider(scrapy.Spider):
             else:
                 size = None
                 size_unit = None
-                
+
+            # Check for average weight/uom if it exists
+            average_weight = product['averageWeight'] if 'averageWeight' in product else None
+            uom = product['uom'] if average_weight is not None else None
+
             price_item = PriceItem(
                 product_code=product['code'],
                 price=product['prices']['price']['value'],
                 type=product['prices']['price']['type'],
                 date=datetime.utcnow(),
-                size=size,
-                size_unit=size_unit
+                size=average_weight if size is None else size,
+                size_unit=uom if size_unit is None else size_unit
             )
             
             # Check if the price already exists in the database
