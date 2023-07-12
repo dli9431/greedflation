@@ -73,3 +73,7 @@ downloads/
 *.mdb
 *.lock
 *.bson
+WiredTiger
+*.turtle
+journal/
+diagnostic.data/
