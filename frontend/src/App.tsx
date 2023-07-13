@@ -6,19 +6,21 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
+import { TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Checkbox, FormControlLabel } from '@mui/material';
 import { Product } from './types/types';
 
 export default function App() {
   const [data, setData] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [showOnlyScraped, setShowOnlyScraped] = useState<boolean>(false);
 
   useEffect(() => {
     fetch('http://localhost:5000/api/get_all')
       .then(response => response.json())
       .then(data => {
         const modifiedData = data.map((item: any) => {
+          console.log(item.scraped_nutrition)
           const mostRecentPrice = item.prices.reduce((prev: any, current: any) => {
             const prevDate = new Date(prev.date).getTime();
             const currentDate = new Date(current.date).getTime();
@@ -29,7 +31,16 @@ export default function App() {
             name: item.name,
             brand: item.brand,
             url: item.url,
-            price: mostRecentPrice.price
+            price: mostRecentPrice.price,
+            scraped_nutrition: item.scraped_nutrition,
+            price_per_carb: item.price_per_carb,
+            price_per_protein: item.price_per_protein,
+            price_per_fat: item.price_per_fat,
+            price_per_calorie: item.price_per_calorie,
+            total_protein: item.total_protein,
+            total_carb: item.total_carb,
+            total_fat: item.total_fat,
+            total_calories: item.total_calories,
           };
         });
         setData(modifiedData);
@@ -39,8 +50,16 @@ export default function App() {
   const handleSortOrderChange = (event: SelectChangeEvent<"asc" | "desc">) => {
     setSortOrder(event.target.value as 'asc' | 'desc');
   };
-
-  const filteredData = data.filter(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const handleShowOnlyScrapedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setShowOnlyScraped(event.target.checked);
+  };
+  const filteredData = data.filter(item => {
+    if (showOnlyScraped) {
+      return item.name.toLowerCase().includes(searchTerm.toLowerCase()) && item.scraped_nutrition;
+    } else {
+      return item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    }
+  });
   const sortedData = filteredData.sort((a, b) => sortOrder === 'asc' ? a.price - b.price : b.price - a.price);
 
   return (
@@ -57,6 +76,10 @@ export default function App() {
           <MenuItem value="desc">High to low</MenuItem>
         </Select>
       </FormControl>
+      <FormControlLabel
+        control={<Checkbox checked={showOnlyScraped} onChange={handleShowOnlyScrapedChange} />}
+        label="Show only scraped nutrition"
+      />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
