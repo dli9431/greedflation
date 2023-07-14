@@ -19,4 +19,5 @@ export interface Product {
     // protein: number;
     // carbs: number;
     // fat: number;
+    [key: string]: any;
 }

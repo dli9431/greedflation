@@ -10,17 +10,17 @@ import { TextField, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent
 import { Product } from './types/types';
 
 export default function App() {
-  const [data, setData] = useState<Product[]>([]);
+  const [modifiedData, setData] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [showOnlyScraped, setShowOnlyScraped] = useState<boolean>(false);
+  const [sortColumn, setSortColumn] = useState<keyof Product>('name');
 
   useEffect(() => {
     fetch('http://localhost:5000/api/get_all')
       .then(response => response.json())
       .then(data => {
         const modifiedData = data.map((item: any) => {
-          console.log(item.scraped_nutrition)
           const mostRecentPrice = item.prices.reduce((prev: any, current: any) => {
             const prevDate = new Date(prev.date).getTime();
             const currentDate = new Date(current.date).getTime();
@@ -28,8 +28,7 @@ export default function App() {
           });
           return {
             product_code: item.product_code,
-            name: item.name,
-            brand: item.brand,
+            name: item.brand ? `${item.brand} ${item.name}` : item.name,
             url: item.url,
             price: mostRecentPrice.price,
             scraped_nutrition: item.scraped_nutrition,
@@ -47,20 +46,40 @@ export default function App() {
       });
   }, []);
 
+  const handleSort = (column: keyof Product) => {
+    if (column === sortColumn) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortOrder('asc');
+    }
+  };
   const handleSortOrderChange = (event: SelectChangeEvent<"asc" | "desc">) => {
     setSortOrder(event.target.value as 'asc' | 'desc');
   };
   const handleShowOnlyScrapedChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setShowOnlyScraped(event.target.checked);
   };
-  const filteredData = data.filter(item => {
+  const filteredData = modifiedData.filter(item => {
     if (showOnlyScraped) {
       return item.name.toLowerCase().includes(searchTerm.toLowerCase()) && item.scraped_nutrition;
     } else {
       return item.name.toLowerCase().includes(searchTerm.toLowerCase());
     }
   });
-  const sortedData = filteredData.sort((a, b) => sortOrder === 'asc' ? a.price - b.price : b.price - a.price);
+  const sortedData = modifiedData
+  .filter((item: Product) => showOnlyScraped ? item.is_scraped : true)
+  .filter((item: Product) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  .sort((a: Product, b: Product) => {
+    const sortValue = sortOrder === 'asc' ? 1 : -1;
+    if (a[sortColumn] < b[sortColumn]) {
+      return -sortValue;
+    }
+    if (a[sortColumn] > b[sortColumn]) {
+      return sortValue;
+    }
+    return 0;
+  });
 
   return (
     <div>
@@ -81,24 +100,22 @@ export default function App() {
         label="Show only scraped nutrition"
       />
       <TableContainer component={Paper}>
-        <Table>
+        <Table border={1}>
           <TableHead>
             <TableRow>
-              <TableCell>Brand</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>URL</TableCell>
-              <TableCell>Product Code</TableCell>
-              <TableCell>Price</TableCell>
+              <TableCell onClick={() => handleSort('name')}>Name</TableCell>
+              <TableCell onClick={() => handleSort('price')}>Price</TableCell>
+              <TableCell onClick={() => handleSort('total_protein')}>Total Protein</TableCell>
+              <TableCell onClick={() => handleSort('price_per_protein')}>Price per protein</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {sortedData.map((item: Product) => (
               <TableRow key={item.product_code}>
-                <TableCell>{item.brand}</TableCell>
-                <TableCell>{item.name}</TableCell>
-                <TableCell>{item.url}</TableCell>
-                <TableCell>{item.product_code}</TableCell>
-                <TableCell>{item.price}</TableCell>
+                <TableCell style={{ width: '25%', padding: 2 }}>{item.name}</TableCell>
+                <TableCell style={{ padding: 2 }}>{item.price}</TableCell>
+                <TableCell style={{ padding: 2 }}>{item.total_protein}</TableCell>
+                <TableCell style={{ padding: 2 }}>{item.price_per_protein}</TableCell>
               </TableRow>
             ))}
           </TableBody>
