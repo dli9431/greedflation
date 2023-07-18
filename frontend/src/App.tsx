@@ -72,6 +72,12 @@ export default function App() {
   .filter((item: Product) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
   .sort((a: Product, b: Product) => {
     const sortValue = sortOrder === 'asc' ? 1 : -1;
+    if (!a[sortColumn]) {
+      return sortValue;
+    }
+    if (!b[sortColumn]) {
+      return -sortValue;
+    }
     if (a[sortColumn] < b[sortColumn]) {
       return -sortValue;
     }
@@ -107,6 +113,7 @@ export default function App() {
               <TableCell onClick={() => handleSort('price')}>Price</TableCell>
               <TableCell onClick={() => handleSort('total_protein')}>Total Protein</TableCell>
               <TableCell onClick={() => handleSort('price_per_protein')}>Price per protein</TableCell>
+              <TableCell onClick={() => handleSort('product_code')}>Product Code</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -116,6 +123,7 @@ export default function App() {
                 <TableCell style={{ padding: 2 }}>{item.price}</TableCell>
                 <TableCell style={{ padding: 2 }}>{item.total_protein}</TableCell>
                 <TableCell style={{ padding: 2 }}>{item.price_per_protein}</TableCell>
+                <TableCell style={{ padding: 2 }}>{item.product_code}</TableCell>
               </TableRow>
             ))}
           </TableBody>

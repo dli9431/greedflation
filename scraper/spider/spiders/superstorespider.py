@@ -314,29 +314,34 @@ class SuperstoreSpider(scrapy.Spider):
             if not existing_product:
                 # Insert a new product document
                 self.db.products.insert_one(dict(product_item))
-        
-            # Check if the package size is available
-            match_size = re.match(r'^([\d\.]+)\s*(\w+)$', product.get('packageSize'))
-            if match_size:
-                size = float(match_size.group(1))
-                size_unit = match_size.group(2)
             else:
-                size = None
-                size_unit = None
+                # Update the existing product document
+                self.db.products.update_one(
+                    {"product_code": product_item["product_code"]},
+                    {"$set": dict(product_item)}
+                )
 
-            # Check for average weight/uom if it exists
-            average_weight = product['averageWeight'] if 'averageWeight' in product else None
-            uom = product['uom'] if average_weight is not None else None
-
+            # Create initial price item
             price_item = PriceItem(
                 product_code=product['code'],
                 price=product['prices']['price']['value'],
                 type=product['prices']['price']['type'],
                 date=datetime.utcnow(),
-                size=average_weight if size is None else size,
-                size_unit=uom if size_unit is None else size_unit
             )
-            
+
+            # Check if the package size is available
+            if len(product.get('packageSize', '')) > 0:
+                match_size = re.match(r'^([\d\.]+)\s*(\w+)$', product.get('packageSize'))
+                if match_size:
+                    price_item['size'] = float(match_size.group(1))
+                    price_item['size_unit'] = match_size.group(2)
+            else:
+                # Check if comparison price exists
+                price_item['comparison_price'] = product['prices']['comparisonPrices'][0]['value']
+                price_item['comparison_unit'] = product['prices']['comparisonPrices'][0]['unit']
+                price_item['average_weight'] = product['averageWeight']
+                price_item['uom'] = product['uom']           
+
             # Check if the price already exists in the database
             existing_product_price = self.db.prices.find_one(
                 {"product_code": price_item["product_code"]})
@@ -347,7 +352,7 @@ class SuperstoreSpider(scrapy.Spider):
                 self.db.prices.insert_one(dict(price_item))
 
             # If product does exist in the price collection
-            else:
+            else:               
                 # Find the most recent price entry for this product
                 last_price = self.db.prices.find_one(
                     {"product_code": price_item["product_code"]}, sort=[("date", pymongo.DESCENDING)])
@@ -355,6 +360,10 @@ class SuperstoreSpider(scrapy.Spider):
                 # Check if the price or size has changed since the last scrape
                 if last_price["price"] != price_item["price"] or last_price.get("size") != price_item.get("size"):
                     # If the price or package size has changed, insert a new price document
+                    self.db.prices.insert_one(dict(price_item))
+                # Check if the average weight has changed since the last scrape
+                elif "average_weight" in last_price and "average_weight" in price_item and last_price["average_weight"] != price_item["average_weight"]:
+                    # If the average weight has changed, insert a new price document
                     self.db.prices.insert_one(dict(price_item))
 
         # Mark page as scraped

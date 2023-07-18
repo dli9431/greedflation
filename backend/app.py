@@ -79,6 +79,10 @@ def get_all():
                 'price_per_fat': 1,
                 'price_per_fiber': 1,
                 'price_per_calories': 1,
+                'prices.comparison_price': 1,
+                'prices.comparison_unit': 1,
+                'prices.average_weight': 1,
+                'prices.uom': 1,
             }
         }
     ]

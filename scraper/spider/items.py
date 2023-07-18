@@ -34,3 +34,7 @@ class PriceItem(scrapy.Item):
     size_unit = scrapy.Field()
     type = scrapy.Field() # regular, special, etc.
     date = scrapy.Field()
+    comparison_price = scrapy.Field()
+    comparison_unit = scrapy.Field()
+    average_weight = scrapy.Field()
+    uom = scrapy.Field()
