@@ -38,3 +38,4 @@ class PriceItem(scrapy.Item):
     comparison_unit = scrapy.Field()
     average_weight = scrapy.Field()
     uom = scrapy.Field()
+    pricing_units = scrapy.Field() # SOLD_BY_EA or SOLD_BY_EA_PRICED_BY_WEIGHT

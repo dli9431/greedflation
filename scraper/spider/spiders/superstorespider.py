@@ -11,9 +11,7 @@ def get_db():
     client = pymongo.MongoClient('mongodb://db:27017/')
     return client['superstoredb']
 
-def total_macros(price, size, size_unit, serving_size, serving_size_unit, protein, protein_unit, carb, carb_unit, 
-                 fat, fat_unit, fiber, fiber_unit, calories):
-    
+def calc_multiplier(size_unit, serving_size_unit):
     # Define conversion factors
     conversion_factors = {
         'g': {
@@ -57,42 +55,14 @@ def total_macros(price, size, size_unit, serving_size, serving_size_unit, protei
             'fl oz': 8.11537
         }
     }
-
-    # Calculate serving size multiplier if size unit is different from serving size unit
-    multiplier = 1
     if size_unit.lower() != serving_size_unit.lower():
         if size_unit.lower() in conversion_factors and serving_size_unit.lower() in conversion_factors[size_unit.lower()]:
             if conversion_factors[size_unit.lower()][serving_size_unit.lower()] > 1:
-                multiplier = conversion_factors[size_unit.lower()][serving_size_unit.lower()]
+                return conversion_factors[size_unit.lower()][serving_size_unit.lower()]
             else:
-                multiplier = 1 / conversion_factors[serving_size_unit.lower()][size_unit.lower()]
+                return 1 / conversion_factors[serving_size_unit.lower()][size_unit.lower()]
         else:
             return None
-    
-    # Calculate number of servings in the product
-    num_servings = float(size) * multiplier / serving_size if serving_size != 0 else 0
-    
-    # Calculate total macros
-    total_fat = fat * num_servings
-    total_protein = protein * num_servings
-    total_carb = carb * num_servings
-    total_fiber = fiber * num_servings
-    total_calories = calories * num_servings
-
-    # Calculate price per macro
-    price_per_fat = price / total_fat if total_fat != 0 else 0
-    price_per_protein = price / total_protein if total_protein != 0 else 0
-    price_per_carb = price / total_carb if total_carb != 0 else 0
-    price_per_fiber = price / total_fiber if total_fiber != 0 else 0
-    price_per_calories = price / total_calories if total_calories != 0 else 0
-
-    # calculate price per serving
-    price_per_serving = price / num_servings if num_servings != 0 else 0
-
-    return {'total_fat': total_fat, 'total_protein': total_protein, 'total_carb': total_carb, 'total_fiber': total_fiber, 
-            'total_servings': num_servings, 'price_per_fat': price_per_fat, 'price_per_protein': price_per_protein,
-            'price_per_carb': price_per_carb, 'price_per_fiber': price_per_fiber, 'price_per_serving': price_per_serving,
-            'total_calories': total_calories, 'price_per_calories': price_per_calories}
 
 class SuperstoreProductsSpider(scrapy.Spider):
     name = 'superstore_products_spider'
@@ -107,8 +77,8 @@ class SuperstoreProductsSpider(scrapy.Spider):
         self.prices = self.db['prices']
 
     def start_requests(self):
-        # testing code (1 item)
-        # query = {'product_code': '21178766_EA'}
+        # # testing code (1 item)
+        # query = {'product_code': '20804532_KG'}
         # document = self.products.find_one(query)
         # if (document):
         #     projection = {'_id': 0, 'price': 1, 'size': 1, 'size_unit': 1, 'type': 1, 'date': 1}
@@ -147,15 +117,7 @@ class SuperstoreProductsSpider(scrapy.Spider):
                         cb_kwargs=dict(item=document, price_item=price_item)
                     )
 
-    def parse(self, response, item, price_item):
-        if (response.status != 404):
-            item['scraped_nutrition'] = False
-
-        data = json.loads(response.body)
-        
-        # Extract ingredients
-        item['ingredients'] = data.get('ingredients')
-        
+    def clean_data(self, data, item, price_item):
         # Extract the nutrition facts section
         nutrition_facts = data.get('nutritionFacts', [])
 
@@ -165,22 +127,22 @@ class SuperstoreProductsSpider(scrapy.Spider):
 
             # Extract specific fields from the nutrition info and assign them to the item
             calories_match = None
-            if nutrition_info.get('calories'):
+            if nutrition_info.get('calories') is not None and nutrition_info['calories']['valueInGram'] is not None:
                 calories_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['calories']['valueInGram'])
             if calories_match:
                 item['calories'] = float(calories_match.group(1))
-                item['calories_unit'] = calories_match.group(2)
+                item['calories_unit'] = calories_match.group(2).lower()
 
             fat_match = None
-            if nutrition_info.get('totalFat'):
+            if nutrition_info.get('totalFat') is not None and nutrition_info['totalFat']['valueInGram'] is not None:
                 fat_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalFat']['valueInGram'])
             if fat_match:
                 item['fat'] = float(fat_match.group(1))
-                item['fat_unit'] = fat_match.group(2)
+                item['fat_unit'] = fat_match.group(2).lower()
 
             fiber_match = None
             carb_match = None
-            if nutrition_info.get('totalCarbohydrate'):
+            if nutrition_info.get('totalCarbohydrate') is not None and nutrition_info['totalCarbohydrate']['valueInGram'] is not None:
                 carb_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalCarbohydrate']['valueInGram'])
                 for nutrient in nutrition_info['totalCarbohydrate'].get('subNutrients', []):
                     if nutrient.get('code') == 'dietaryFiber':
@@ -188,54 +150,78 @@ class SuperstoreProductsSpider(scrapy.Spider):
 
             if carb_match:
                 item['carb'] = float(carb_match.group(1))
-                item['carb_unit'] = carb_match.group(2)
+                item['carb_unit'] = carb_match.group(2).lower()
 
             if fiber_match:
                 item['fiber'] = float(fiber_match.group(1))
-                item['fiber_unit'] = fiber_match.group(2)
+                item['fiber_unit'] = fiber_match.group(2).lower()
 
             protein_match = None
-            if nutrition_info.get('protein'):
+            if nutrition_info.get('protein') is not None and nutrition_info['protein']['valueInGram'] is not None:
                 protein_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['protein']['valueInGram'])
             if protein_match:
                 item['protein'] = float(protein_match.group(1))
-                item['protein_unit'] = protein_match.group(2)
+                item['protein_unit'] = protein_match.group(2).lower()
 
             serving_size_match = None
-            if nutrition_info.get('topNutrition') and nutrition_info['topNutrition'][0].get('valueInGram'):
+            if nutrition_info.get('topNutrition') is not None and nutrition_info['topNutrition'][0].get('valueInGram') is not None:
                 serving_size_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['topNutrition'][0]['valueInGram'])
             if serving_size_match:
                 item['serving_size'] = float(serving_size_match.group(1))
-                item['serving_size_unit'] = serving_size_match.group(2)
+                item['serving_size_unit'] = serving_size_match.group(2).lower()
 
-            if 'price' in price_item and 'size' in price_item and 'size_unit' in price_item and 'serving_size' in item and 'serving_size_unit' in item and 'protein' in item and 'protein_unit' in item and 'carb' in item and 'carb_unit' in item and 'fat' in item and 'fat_unit' in item and 'fiber' in item and 'fiber_unit' in item:
-                total = total_macros(price_item['price'], price_item['size'], price_item['size_unit'], item['serving_size'], item['serving_size_unit'], 
-                                            item['protein'], item['protein_unit'], item['carb'], item['carb_unit'],
-                                            item['fat'], item['fat_unit'], item['fiber'], item['fiber_unit'], item['calories'])
-                if total is not None and all(key in total for key in ['total_fat', 'total_protein', 'total_carb', 'total_fiber', 'total_servings', 
-                                                     'price_per_fat', 'price_per_protein', 'price_per_carb', 'price_per_fiber', 
-                                                     'price_per_serving']):
-                    item['price_per_serving'] = total['price_per_serving']
-                    item['price_per_protein'] = total['price_per_protein']
-                    item['price_per_carb'] = total['price_per_carb']
-                    item['price_per_fat'] = total['price_per_fat']
-                    item['price_per_fiber'] = total['price_per_fiber']
-                    item['total_protein'] = total['total_protein']
-                    item['total_carb'] = total['total_carb']
-                    item['total_fat'] = total['total_fat']
-                    item['total_fiber'] = total['total_fiber']
-                    item['total_calories'] = total['total_calories']
-                    item['total_servings'] = total['total_servings']
-                    
-                # If we've done all the calculations on nutrition data set scraped_nutrition to True
-                item['scraped_nutrition'] = True
-        else:
-            # If item has no nutrition data, set scraped_nutrition to False
+            # Calculate serving size multiplier if size unit is different from serving size unit
+            multiplier = 1
+            size = 0.0
+            size_unit = ''
+
+            # Check for pricing units type
+            if ('uom' in price_item and price_item['uom'] is not None):
+                size = float(price_item['average_weight'])
+                size_unit = price_item['uom']
+            elif ('size' in price_item and price_item['size'] is not None):
+                size = float(price_item['size'])
+                size_unit = price_item['size_unit']
+            
+            multiplier = calc_multiplier(size_unit, item['serving_size_unit'])
+            
+            if multiplier is not None:
+                # Calculate number of servings in the product
+                num_servings = size * multiplier / item['serving_size'] if item['serving_size'] != 0 else 0
+            
+                # Calculate total macros
+                item['total_fat'] = item['fat'] * num_servings
+                item['total_protein'] = item['protein'] * num_servings
+                item['total_carb'] = item['carb'] * num_servings
+                item['total_fiber'] = item['fiber'] * num_servings
+                item['total_calories'] = item['calories'] * num_servings
+
+                # Calculate price per macro
+                item['price_per_fat'] = price_item['price'] / item['total_fat'] if item['total_fat'] != 0 else 0
+                item['price_per_protein'] = price_item['price'] / item['total_protein'] if item['total_protein'] != 0 else 0
+                item['price_per_carb'] = price_item['price'] / item['total_carb'] if item['total_carb'] != 0 else 0
+                item['price_per_fiber'] = price_item['price'] / item['total_fiber'] if item['total_fiber'] != 0 else 0
+                item['price_per_calories'] = price_item['price'] / item['total_calories'] if item['total_calories'] != 0 else 0
+
+                # calculate price per serving
+                item['price_per_serving'] = price_item['price'] / num_servings if num_servings != 0 else 0
+
+        # Extract ingredients
+        item['ingredients'] = data.get('ingredients')
+        item['scraped_nutrition'] = True
+        return item       
+
+    def parse(self, response, item, price_item):
+        if (response.status != 404):
             item['scraped_nutrition'] = False
 
+        data = json.loads(response.body)
+        
+        cleaned_item = self.clean_data(data, item, price_item)
+
         # Update the document in the database
-        query = {'_id': item['_id']}
-        update = {'$set': item }
+        query = {'_id': cleaned_item['_id']}
+        update = {'$set': cleaned_item }
         self.products.update_one(query, update)
 
 class SuperstoreSpider(scrapy.Spider):
@@ -330,17 +316,19 @@ class SuperstoreSpider(scrapy.Spider):
             )
 
             # Check if the package size is available
-            if len(product.get('packageSize', '')) > 0:
-                match_size = re.match(r'^([\d\.]+)\s*(\w+)$', product.get('packageSize'))
+            if product['pricingUnits']['type'].lower() == 'sold_by_each_priced_by_weight':
+                price_item['comparison_price'] = product['prices']['comparisonPrices'][0]['value']
+                price_item['comparison_unit'] = product['prices']['comparisonPrices'][0]['unit'].lower()
+                price_item['average_weight'] = product['averageWeight']
+                price_item['uom'] = product['uom'].lower()
+                price_item['pricing_units'] = product['pricingUnits']['type'].lower()
+            
+            if product['pricingUnits']['type'].lower() == 'sold_by_each':
+                match_size = re.match(r'^([\d\.]+)\s*(\w+)$', product['packageSize'])
                 if match_size:
                     price_item['size'] = float(match_size.group(1))
-                    price_item['size_unit'] = match_size.group(2)
-            else:
-                # Check if comparison price exists
-                price_item['comparison_price'] = product['prices']['comparisonPrices'][0]['value']
-                price_item['comparison_unit'] = product['prices']['comparisonPrices'][0]['unit']
-                price_item['average_weight'] = product['averageWeight']
-                price_item['uom'] = product['uom']           
+                    price_item['size_unit'] = match_size.group(2).lower()
+                    price_item['pricing_units'] = product['pricingUnits']['type'].lower()
 
             # Check if the price already exists in the database
             existing_product_price = self.db.prices.find_one(

@@ -63,11 +63,6 @@ def get_all():
                 'protein_unit': 1,
                 'serving_size': 1,
                 'serving_size_unit': 1,
-                'scraped_nutrition': 1,
-                'prices.price': 1,
-                'prices.date': 1,
-                'prices.size': 1,
-                'prices.size_unit': 1,
                 'total_protein': 1,
                 'total_carb': 1,
                 'total_fat': 1,
@@ -79,10 +74,16 @@ def get_all():
                 'price_per_fat': 1,
                 'price_per_fiber': 1,
                 'price_per_calories': 1,
+                'scraped_nutrition': 1,
+                'prices.price': 1,
+                'prices.date': 1,
+                'prices.size': 1,
+                'prices.size_unit': 1,
                 'prices.comparison_price': 1,
                 'prices.comparison_unit': 1,
                 'prices.average_weight': 1,
                 'prices.uom': 1,
+                'prices.pricing_units': 1
             }
         }
     ]
