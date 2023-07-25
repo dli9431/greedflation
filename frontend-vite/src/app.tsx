@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import {
   Fallback,
   Layout,
@@ -9,6 +7,8 @@ import {
   ProjectErrorBoundary,
   projectLoader,
 } from "./routes";
+import { useState } from 'preact/hooks'
+import './app.css'
 
 let router = createBrowserRouter([
   {
@@ -33,5 +33,10 @@ let router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} fallbackElement={<Fallback />} />;
+
+  return (
+    <>
+      <RouterProvider router={router} fallbackElement={<Fallback />} />
+    </>
+  )
 }

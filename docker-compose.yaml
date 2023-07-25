@@ -31,6 +31,20 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+  frontend-vite:
+    image: frontend-vite
+    build:
+      context: ./frontend-vite
+      dockerfile: Dockerfile
+      args:
+        build: ${build}
+    environment:
+      - NODE_ENV=${build}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./frontend-vite:/app
+      - /app/node_modules
   backend:
     image: backend
     build:
