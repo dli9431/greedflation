@@ -5,7 +5,6 @@ import {
   Fallback,
   Layout,
   RootErrorBoundary,
-  Project,
   ProjectErrorBoundary,
   projectLoader,
 } from "./routes";
@@ -19,14 +18,14 @@ let router = createBrowserRouter([
         path: "",
         element: <Outlet />,
         errorElement: <RootErrorBoundary />,
-        children: [
-          {
-            path: "projects/:projectId",
-            element: <Project />,
-            errorElement: <ProjectErrorBoundary />,
-            loader: projectLoader,
-          },
-        ],
+        // children: [
+        //   {
+        //     path: "projects/:projectId",
+        //     element: <Project />,
+        //     errorElement: <ProjectErrorBoundary />,
+        //     loader: projectLoader,
+        //   },
+        // ],
       },
     ],
   },

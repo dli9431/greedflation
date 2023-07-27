@@ -9,6 +9,7 @@ import {
     useRouteError,
     LoaderFunction
 } from "react-router-dom";
+import List from "./list";
 
 export function Fallback() {
     return <p>Performing initial data "load"</p>;
@@ -17,36 +18,7 @@ export function Fallback() {
 export function Layout() {
     return (
         <>
-            <nav>
-                <Link to="/projects/authorized">Authorized Project</Link>
-                &nbsp;|&nbsp;
-                <Link to="/projects/unauthorized">Unauthorized Project</Link>
-                &nbsp;|&nbsp;
-                <Link to="/projects/broken">Broken Project</Link>
-            </nav>
-            <p>
-                This example shows the flexibility of{" "}
-                <code>&lt;Route errorElement&gt;</code>
-            </p>
-            <ul>
-                <li>
-                    Clicking the "Authorized Project" link will take you to the happy path
-                    where we successfully load and render the details for a project.
-                </li>
-                <li>
-                    Clicking the "Unauthorized Project" link will simulate a case where
-                    the user does not have access to the given project, so our loader can
-                    throw a 401 response that is handed in-context by a{" "}
-                    <code>&lt;ProjectErrorBoundary&gt;</code>.
-                </li>
-                <li>
-                    Clicking the "Broken Project" link will return some malformed data
-                    causing a render error. This is beyond what{" "}
-                    <code>&lt;ProjectErrorBoundary&gt;</code> can handle, so it re-throws
-                    the error and it gets handled by{" "}
-                    <code>&lt;RootErrorBoundary&gt;</code> instead.
-                </li>
-            </ul>
+            <List />
             <Outlet />
         </>
     );
@@ -92,18 +64,6 @@ export function projectLoader({ params }: LoaderFunctionArgs) {
             cost: "$5,000 USD",
         },
     });
-}
-
-export function Project() {
-    const { project } = useLoaderData();
-    return (
-        <>
-            <h1>Project Name: {project.name}</h1>
-            {/* <p>Owner: {data.owner}</p>
-          <p>Deadline: {Project.deadline}</p>
-          <p>Cost: {Project.cost}</p> */}
-        </>
-    );
 }
 
 export function ProjectErrorBoundary() {

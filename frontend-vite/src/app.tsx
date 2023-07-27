@@ -7,7 +7,6 @@ import {
   ProjectErrorBoundary,
   projectLoader,
 } from "./routes";
-import { useState } from 'preact/hooks'
 import './app.css'
 
 let router = createBrowserRouter([
@@ -33,7 +32,6 @@ let router = createBrowserRouter([
 ]);
 
 export default function App() {
-
   return (
     <>
       <RouterProvider router={router} fallbackElement={<Fallback />} />

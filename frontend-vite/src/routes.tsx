@@ -8,6 +8,7 @@ import {
     useRouteError,
     LoaderFunction
 } from "react-router-dom";
+import List from "./list";
 
 export function Fallback() {
     return <p>Performing initial data "load"</p>;
@@ -16,7 +17,7 @@ export function Fallback() {
 export function Layout() {
     return (
         <>
-            <nav>
+            {/* <nav>
                 <Link to="/projects/authorized">Authorized Project</Link>
                 &nbsp;|&nbsp;
                 <Link to="/projects/unauthorized">Unauthorized Project</Link>
@@ -45,7 +46,8 @@ export function Layout() {
                     the error and it gets handled by{" "}
                     <code>&lt;RootErrorBoundary&gt;</code> instead.
                 </li>
-            </ul>
+            </ul> */}
+            <List />
             <Outlet />
         </>
     );
