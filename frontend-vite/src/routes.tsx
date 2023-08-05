@@ -6,49 +6,23 @@ import {
     Outlet,
     useLoaderData,
     useRouteError,
-    LoaderFunction
+    LoaderFunction,
+    useMatch
 } from "react-router-dom";
 import List from "./list";
+import { Product } from './types/types';
 
 export function Fallback() {
     return <p>Performing initial data "load"</p>;
 }
 
 export function Layout() {
+    // const isIndexPage = useMatch('/');
+
     return (
         <>
-            {/* <nav>
-                <Link to="/projects/authorized">Authorized Project</Link>
-                &nbsp;|&nbsp;
-                <Link to="/projects/unauthorized">Unauthorized Project</Link>
-                &nbsp;|&nbsp;
-                <Link to="/projects/broken">Broken Project</Link>
-            </nav>
-            <p>
-                This example shows the flexibility of{" "}
-                <code>&lt;Route errorElement&gt;</code>
-            </p>
-            <ul>
-                <li>
-                    Clicking the "Authorized Project" link will take you to the happy path
-                    where we successfully load and render the details for a project.
-                </li>
-                <li>
-                    Clicking the "Unauthorized Project" link will simulate a case where
-                    the user does not have access to the given project, so our loader can
-                    throw a 401 response that is handed in-context by a{" "}
-                    <code>&lt;ProjectErrorBoundary&gt;</code>.
-                </li>
-                <li>
-                    Clicking the "Broken Project" link will return some malformed data
-                    causing a render error. This is beyond what{" "}
-                    <code>&lt;ProjectErrorBoundary&gt;</code> can handle, so it re-throws
-                    the error and it gets handled by{" "}
-                    <code>&lt;RootErrorBoundary&gt;</code> instead.
-                </li>
-            </ul> */}
-            <List />
             <Outlet />
+            <List />
         </>
     );
 }
@@ -65,40 +39,58 @@ export function RootErrorBoundary() {
         </div>
     );
 }
+export async function productLoader({ params }: LoaderFunctionArgs) {
+    console.log('test')
+    console.log(params)
+    const product: Product = await fetch(`http://localhost:5000/api/product?product_code=${params.productid}&store=`).then((res) => res.json());
+    console.log(product);
+    return json(product);
+    // if (params.productId === "unauthorized") {
+    //     throw json({ contactEmail: "administrator@fake.com" }, { status: 401 });
+    // }
 
-export function projectLoader({ params }: LoaderFunctionArgs) {
-    if (params.projectId === "unauthorized") {
-        throw json({ contactEmail: "administrator@fake.com" }, { status: 401 });
-    }
+    // if (params.productId === "broken") {
+    //     // Uh oh - in this flow we somehow didn't get our data nested under `project`
+    //     // and instead got it at the root - this will cause a render error!
+    //     return json({
+    //         id: params.projectId,
+    //         name: "Break Some Stuff",
+    //         owner: "The Joker",
+    //         deadline: "June 2022",
+    //         cost: "FREE",
+    //     });
+    // }
 
-    if (params.projectId === "broken") {
-        // Uh oh - in this flow we somehow didn't get our data nested under `project`
-        // and instead got it at the root - this will cause a render error!
-        return json({
-            id: params.projectId,
-            name: "Break Some Stuff",
-            owner: "The Joker",
-            deadline: "June 2022",
-            cost: "FREE",
-        });
-    }
-
-    return json({
-        project: {
-            id: params.projectId,
-            name: "Build Some Stuff",
-            owner: "Joe",
-            deadline: "June 2022",
-            cost: "$5,000 USD",
-        },
-    });
+    // return json({
+    //     product: {
+    //         id: params.productId,
+    //         name: params.name,
+    //         product_code: params.product_code,
+    //     },
+    // });
 }
 
-export function Project() {
-    // const { project } = useLoaderData();
+export function ProductView() {
+    const product = useLoaderData() as Product;
+
     return (
         <>
-            <h1>Project Name: </h1>
+            <h1>Product: {product.name}</h1>
+            <p>Product Code: {product.product_code}</p>
+            <p>Brand: {product.brand}</p>
+            <p>URL: {product.url}</p>
+            <p>Price: {product.price}</p>
+            <p>Scraped Nutrition: {product.scraped_nutrition}</p>
+            <p>Price per Protein: {product.price_per_protein}</p>
+            <p>Total Protein: {product.total_protein}</p>
+            <p>Total Carb: {product.total_carb}</p>
+            <p>Price per Carb: {product.price_per_carb}</p>
+            <p>Total Fat: {product.total_fat}</p>
+            <p>Price per Fat: {product.price_per_fat}</p>
+            <p>Total Calories: {product.total_calories}</p>
+            <p>Price per Calories: {product.price_per_calories}</p>
+            <p>Total Fiber: {product.total_fiber}</p>
+            <p>Price per Fiber: {product.price_per_fiber}</p>
             {/* <p>Owner: {data.owner}</p>
           <p>Deadline: {Project.deadline}</p>
           <p>Cost: {Project.cost}</p> */}
@@ -106,7 +98,7 @@ export function Project() {
     );
 }
 
-export function ProjectErrorBoundary() {
+export function ProductErrorBoundary() {
     let error = useRouteError();
 
     // We only care to handle 401's at this level, so if this is not a 401
@@ -117,7 +109,7 @@ export function ProjectErrorBoundary() {
 
     return (
         <>
-            <h1>You do not have access to this project</h1>
+            <h1>You do not have access to this product</h1>
             <p>
                 Please reach out to{" "}
                 <a href={`mailto:${error.data.contactEmail}`}>

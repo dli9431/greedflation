@@ -22,7 +22,6 @@ def get_db():
     client = MongoClient('mongodb://db:27017/')
     return client['superstoredb']
 
-
 class CustomJSONEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, ObjectId):
@@ -90,6 +89,71 @@ def get_all():
     data = list(products.aggregate(pipeline))
     return jsonify(data)
 
+# @app.route('/api/store/<string:store_name>/product/<string:product_code>', methods=['GET'])
+@app.route('/api/store/<store_name>/product/<product_code>')
+def product(store_name, product_code):
+    db = get_db()
+    products = db['products']
+    prices = db['prices']
+    pipeline = [
+        {
+            '$match': {
+                'product_code': product_code
+            }
+        },
+        {
+            '$lookup': {
+                'from': 'pricing',
+                'localField': 'product_code',
+                'foreignField': 'product_code',
+                'as': 'prices'
+            }
+        },
+        {
+            '$project': {
+                '_id': 0,
+                'product_code': 1,
+                'name': 1,
+                'brand': 1,
+                'url': 1,
+                'calories': 1,
+                'calories_unit': 1,
+                'carb': 1,
+                'carb_unit': 1,
+                'fat': 1,
+                'fat_unit': 1,
+                'fiber': 1,
+                'fiber_unit': 1,
+                'protein': 1,
+                'protein_unit': 1,
+                'serving_size': 1,
+                'serving_size_unit': 1,
+                'total_protein': 1,
+                'total_carb': 1,
+                'total_fat': 1,
+                'total_fiber': 1,
+                'total_calories': 1,
+                'total_servings': 1,
+                'price_per_protein': 1,
+                'price_per_carb': 1,
+                'price_per_fat': 1,
+                'price_per_fiber': 1,
+                'price_per_calories': 1,
+                'scraped_nutrition': 1,
+                'prices.price': 1,
+                'prices.date': 1,
+                'prices.size': 1,
+                'prices.size_unit': 1,
+                'prices.comparison_price': 1,
+                'prices.comparison_unit': 1,
+                'prices.average_weight': 1,
+                'prices.uom': 1,
+                'prices.pricing_units': 1
+            }
+        }
+    ]
+    data = list(products.aggregate(pipeline))
+    return jsonify(data)
 
 @app.route('/duplicates/<string:collection_name>')
 def duplicates(collection_name):

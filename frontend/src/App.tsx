@@ -18,6 +18,7 @@ let router = createBrowserRouter([
         path: "",
         element: <Outlet />,
         errorElement: <RootErrorBoundary />,
+        
         // children: [
         //   {
         //     path: "projects/:projectId",

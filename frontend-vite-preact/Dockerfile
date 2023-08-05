@@ -11,7 +11,8 @@ COPY package*.json ./
 ARG build
 
 # Install any needed packages specified in package.json
-RUN if [ "$build" = "prod" ]; then npm install --production; else npm install; fi
+# RUN if [ "$build" = "prod" ]; then npm install --production; else npm install; fi
+RUN npm install
 
 # Copy the rest of the app code into the container
 COPY . .

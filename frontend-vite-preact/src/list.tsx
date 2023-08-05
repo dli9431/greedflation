@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { h, Fragment } from 'preact';
+import { useState, useEffect } from 'preact/hooks';
 import { TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, FormControlLabel, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
 import { Product } from './types/types';
-import { Link } from "react-router-dom";
 
 export default function List() {
     const [modifiedData, setData] = useState<Product[]>([]);
@@ -85,7 +85,7 @@ export default function List() {
         });
 
     return (
-        <div>
+        <Fragment>
             <TextField
                 label="Search by item name"
                 value={searchTerm}
@@ -117,8 +117,7 @@ export default function List() {
                         {sortedData.map((item: Product) => (
                             <TableRow key={item.product_code}>
                                 <TableCell style={{ width: '25%', padding: 2 }}>
-                                {/* <Link to={`?store=superstore&product=${item.product_code}`}>{item.name}</Link> */}
-                                <Link to={`/store/superstore/product/${item.product_code}`}>{item.name}</Link>
+                                    {item.name}
                                 </TableCell>
                                 <TableCell style={{ padding: 2 }}>{item.price}</TableCell>
                                 <TableCell style={{ padding: 2 }}>{item.total_protein}</TableCell>
@@ -129,7 +128,7 @@ export default function List() {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </div>
+        </Fragment>
     );
 }
 // import { useState, useEffect } from 'preact/hooks';
