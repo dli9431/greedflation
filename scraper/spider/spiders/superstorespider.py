@@ -304,7 +304,7 @@ class SuperstoreSpider(scrapy.Spider):
         pagination_from = payload['pagination']['from']
         pagination_size = payload['pagination']['size']
         self.db[self.collection_name_scraped].insert_one(
-            {'url': url, 'pagination_from': pagination_from,
+            {'category_id': payload['categoryId'], 'store_id': payload['storeId'], 'url': url, 'pagination_from': pagination_from,
              'pagination_size': pagination_size, 'timestamp': datetime.utcnow()})
 
     def start_requests(self):
