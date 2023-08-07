@@ -250,8 +250,9 @@ class SuperstoreSpider(scrapy.Spider):
     page_size = 50
     store_id = 1517
     # category_id = 27998
-    category_ids = [27998, 28005]
-
+    # meat, frozen, fruit/veg, dairy/eggs, pantry, international, fish/seafood, snacks, drinks, organic, deli, bakery, prepared
+    category_ids = [27998, 28005, 28000, 28003, 28006, 58044, 27999, 57025, 28004, 28189, 28001, 28002, 27996] 
+    
     def __init__(self, *args, **kwargs):
         super(SuperstoreSpider, self).__init__(*args, **kwargs)
         self.client = pymongo.MongoClient('mongodb://db:27017/')
