@@ -44,7 +44,6 @@ services:
       - "8000:8000"
     volumes:
       - ./frontend-vite:/app
-      - /app/node_modules
   backend:
     image: backend
     build:

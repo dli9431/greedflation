@@ -11,6 +11,7 @@ def get_db():
     client = pymongo.MongoClient('mongodb://db:27017/')
     return client['superstoredb']
 
+
 def calc_multiplier(size_unit, serving_size_unit):
     # Define conversion factors
     conversion_factors = {
@@ -64,6 +65,7 @@ def calc_multiplier(size_unit, serving_size_unit):
         else:
             return None
 
+
 class SuperstoreProductsSpider(scrapy.Spider):
     name = 'superstore_products_spider'
     url = 'https://api.pcexpress.ca/product-facade/v4/products'
@@ -87,7 +89,7 @@ class SuperstoreProductsSpider(scrapy.Spider):
 
         #     if price_item:
         #         req = self.url + \
-        #             pyld.generate_product_payload(document['product_code'])           
+        #             pyld.generate_product_payload(document['product_code'])
         #         yield scrapy.Request(
         #             req,
         #             method='GET',
@@ -98,18 +100,20 @@ class SuperstoreProductsSpider(scrapy.Spider):
         # Find documents without the 'scraped_nutrition' field
         query = {'scraped_nutrition': {'$exists': False}}
         documents = self.products.find(query)
-    
+
         # Extract the URLs and create start URLs for scraping
         for document in documents:
             if document:
                 query = {'product_code': document['product_code']}
-                projection = {'_id': 0, 'price': 1, 'size': 1, 'size_unit': 1, 'type': 1, 'date': 1}
+                projection = {'_id': 0, 'price': 1, 'size': 1,
+                              'size_unit': 1, 'type': 1, 'date': 1}
                 sort = [('date', pymongo.DESCENDING)]
-                price_item = self.prices.find_one(query, projection=projection, sort=sort)
+                price_item = self.prices.find_one(
+                    query, projection=projection, sort=sort)
 
                 if price_item:
                     req = self.url + \
-                        pyld.generate_product_payload(document['product_code'])           
+                        pyld.generate_product_payload(document['product_code'])
                     yield scrapy.Request(
                         req,
                         method='GET',
@@ -128,14 +132,16 @@ class SuperstoreProductsSpider(scrapy.Spider):
             # Extract specific fields from the nutrition info and assign them to the item
             calories_match = None
             if nutrition_info.get('calories') is not None and nutrition_info['calories']['valueInGram'] is not None:
-                calories_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['calories']['valueInGram'])
+                calories_match = re.match(
+                    r'^([\d\.]+)\s*(\w+)$', nutrition_info['calories']['valueInGram'])
             if calories_match:
                 item['calories'] = float(calories_match.group(1))
                 item['calories_unit'] = calories_match.group(2).lower()
 
             fat_match = None
             if nutrition_info.get('totalFat') is not None and nutrition_info['totalFat']['valueInGram'] is not None:
-                fat_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalFat']['valueInGram'])
+                fat_match = re.match(
+                    r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalFat']['valueInGram'])
             if fat_match:
                 item['fat'] = float(fat_match.group(1))
                 item['fat_unit'] = fat_match.group(2).lower()
@@ -143,10 +149,12 @@ class SuperstoreProductsSpider(scrapy.Spider):
             fiber_match = None
             carb_match = None
             if nutrition_info.get('totalCarbohydrate') is not None and nutrition_info['totalCarbohydrate']['valueInGram'] is not None:
-                carb_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalCarbohydrate']['valueInGram'])
+                carb_match = re.match(
+                    r'^([\d\.]+)\s*(\w+)$', nutrition_info['totalCarbohydrate']['valueInGram'])
                 for nutrient in nutrition_info['totalCarbohydrate'].get('subNutrients', []):
                     if nutrient.get('code') == 'dietaryFiber':
-                        fiber_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrient['valueInGram'])
+                        fiber_match = re.match(
+                            r'^([\d\.]+)\s*(\w+)$', nutrient['valueInGram'])
 
             if carb_match:
                 item['carb'] = float(carb_match.group(1))
@@ -158,14 +166,16 @@ class SuperstoreProductsSpider(scrapy.Spider):
 
             protein_match = None
             if nutrition_info.get('protein') is not None and nutrition_info['protein']['valueInGram'] is not None:
-                protein_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['protein']['valueInGram'])
+                protein_match = re.match(
+                    r'^([\d\.]+)\s*(\w+)$', nutrition_info['protein']['valueInGram'])
             if protein_match:
                 item['protein'] = float(protein_match.group(1))
                 item['protein_unit'] = protein_match.group(2).lower()
 
             serving_size_match = None
             if nutrition_info.get('topNutrition') is not None and nutrition_info['topNutrition'][0].get('valueInGram') is not None:
-                serving_size_match = re.match(r'^([\d\.]+)\s*(\w+)$', nutrition_info['topNutrition'][0]['valueInGram'])
+                serving_size_match = re.match(
+                    r'^([\d\.]+)\s*(\w+)$', nutrition_info['topNutrition'][0]['valueInGram'])
             if serving_size_match:
                 item['serving_size'] = float(serving_size_match.group(1))
                 item['serving_size_unit'] = serving_size_match.group(2).lower()
@@ -182,13 +192,14 @@ class SuperstoreProductsSpider(scrapy.Spider):
             elif ('size' in price_item and price_item['size'] is not None):
                 size = float(price_item['size'])
                 size_unit = price_item['size_unit']
-            
+
             multiplier = calc_multiplier(size_unit, item['serving_size_unit'])
-            
+
             if multiplier is not None:
                 # Calculate number of servings in the product
-                num_servings = size * multiplier / item['serving_size'] if item['serving_size'] != 0 else 0
-            
+                num_servings = size * multiplier / \
+                    item['serving_size'] if item['serving_size'] != 0 else 0
+
                 # Calculate total macros
                 item['total_fat'] = item['fat'] * num_servings
                 item['total_protein'] = item['protein'] * num_servings
@@ -197,37 +208,48 @@ class SuperstoreProductsSpider(scrapy.Spider):
                 item['total_calories'] = item['calories'] * num_servings
 
                 # Calculate price per macro
-                item['price_per_fat'] = price_item['price'] / item['total_fat'] if item['total_fat'] != 0 else 0
-                item['price_per_protein'] = price_item['price'] / item['total_protein'] if item['total_protein'] != 0 else 0
-                item['price_per_carb'] = price_item['price'] / item['total_carb'] if item['total_carb'] != 0 else 0
-                item['price_per_fiber'] = price_item['price'] / item['total_fiber'] if item['total_fiber'] != 0 else 0
-                item['price_per_calories'] = price_item['price'] / item['total_calories'] if item['total_calories'] != 0 else 0
+                item['price_per_fat'] = price_item['price'] / \
+                    item['total_fat'] if item['total_fat'] != 0 else 0
+                item['price_per_protein'] = price_item['price'] / \
+                    item['total_protein'] if item['total_protein'] != 0 else 0
+                item['price_per_carb'] = price_item['price'] / \
+                    item['total_carb'] if item['total_carb'] != 0 else 0
+                item['price_per_fiber'] = price_item['price'] / \
+                    item['total_fiber'] if item['total_fiber'] != 0 else 0
+                item['price_per_calories'] = price_item['price'] / \
+                    item['total_calories'] if item['total_calories'] != 0 else 0
 
                 # calculate price per serving
-                item['price_per_serving'] = price_item['price'] / num_servings if num_servings != 0 else 0
+                item['price_per_serving'] = price_item['price'] / \
+                    num_servings if num_servings != 0 else 0
 
         # Extract ingredients
         item['ingredients'] = data.get('ingredients')
         item['scraped_nutrition'] = True
-        return item       
+        return item
 
     def parse(self, response, item, price_item):
         if (response.status != 404):
             item['scraped_nutrition'] = False
 
         data = json.loads(response.body)
-        
+
         cleaned_item = self.clean_data(data, item, price_item)
 
         # Update the document in the database
         query = {'_id': cleaned_item['_id']}
-        update = {'$set': cleaned_item }
+        update = {'$set': cleaned_item}
         self.products.update_one(query, update)
+
 
 class SuperstoreSpider(scrapy.Spider):
     name = 'superstore_spider'
     url = 'https://api.pcexpress.ca/product-facade/v3/products/category/listing'
     headers = pyld.headers
+    page_from = 0
+    page_size = 50
+    store_id = 1517
+    category_id = 27998
 
     def __init__(self, *args, **kwargs):
         super(SuperstoreSpider, self).__init__(*args, **kwargs)
@@ -261,6 +283,23 @@ class SuperstoreSpider(scrapy.Spider):
             print('has_been_scraped: True')
             return True
 
+    def generate_payload(self):
+        return {
+            "pagination": {
+                "from": self.page_from,
+                "size": self.page_size
+            },
+            "banner": "superstore",
+            # generate this based on initial request later
+            "cartId": "5d1f7722-6085-4f8e-b854-9bdd3e7d11ec",
+            "lang": "en",
+            "storeId": self.store_id,
+            "pcId": None,
+            "pickupType": "STORE",
+            "offerType": "ALL",
+            "categoryId": self.category_id,
+        }
+
     def mark_as_scraped(self, url, payload):
         pagination_from = payload['pagination']['from']
         pagination_size = payload['pagination']['size']
@@ -270,7 +309,7 @@ class SuperstoreSpider(scrapy.Spider):
 
     def start_requests(self):
         print('start_requests')
-        payload = pyld.generate_payload(50, 0)
+        payload = self.generate_payload()
         print(payload)
         if not self.has_been_scraped(self.url, payload):
             yield scrapy.Request(
@@ -318,13 +357,15 @@ class SuperstoreSpider(scrapy.Spider):
             # Check if the package size is available
             if product['pricingUnits']['type'].lower() == 'sold_by_each_priced_by_weight':
                 price_item['comparison_price'] = product['prices']['comparisonPrices'][0]['value']
-                price_item['comparison_unit'] = product['prices']['comparisonPrices'][0]['unit'].lower()
+                price_item['comparison_unit'] = product['prices']['comparisonPrices'][0]['unit'].lower(
+                )
                 price_item['average_weight'] = product['averageWeight']
                 price_item['uom'] = product['uom'].lower()
                 price_item['pricing_units'] = product['pricingUnits']['type'].lower()
-            
+
             if product['pricingUnits']['type'].lower() == 'sold_by_each':
-                match_size = re.match(r'^([\d\.]+)\s*(\w+)$', product['packageSize'])
+                match_size = re.match(
+                    r'^([\d\.]+)\s*(\w+)$', product['packageSize'])
                 if match_size:
                     price_item['size'] = float(match_size.group(1))
                     price_item['size_unit'] = match_size.group(2).lower()
@@ -340,7 +381,7 @@ class SuperstoreSpider(scrapy.Spider):
                 self.db.prices.insert_one(dict(price_item))
 
             # If product does exist in the price collection
-            else:               
+            else:
                 # Find the most recent price entry for this product
                 last_price = self.db.prices.find_one(
                     {"product_code": price_item["product_code"]}, sort=[("date", pymongo.DESCENDING)])
@@ -363,3 +404,7 @@ class SuperstoreSpider(scrapy.Spider):
             if not self.has_been_scraped(self.url, payload):
                 yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
                                      headers=self.headers, cb_kwargs=dict(payload=payload))
+
+class SuperstoreSpiderFrozen(SuperstoreSpider):
+    name = 'superstore_spider_frozen'
+    category_id = 28005

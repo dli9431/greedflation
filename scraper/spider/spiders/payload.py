@@ -10,25 +10,6 @@ def generate_product_payload(code):
 
     return f'/{code}?lang=en&date={date_str}&pickupType=STORE&storeId=1517&banner=superstore'
 
-
-def generate_payload(page_size=50, page_from=0):
-    return {
-        "pagination": {
-            "from": page_from,
-            "size": page_size
-        },
-        "banner": "superstore",
-        # generate this based on initial request later
-        "cartId": "5d1f7722-6085-4f8e-b854-9bdd3e7d11ec",
-        "lang": "en",
-        "storeId": "1517",
-        "pcId": None,
-        "pickupType": "STORE",
-        "offerType": "ALL",
-        "categoryId": "27998",
-    }
-
-
 v4_headers = {
     "Accept": "application/json, text/plain, */*",
     "Accept-Language": "en",

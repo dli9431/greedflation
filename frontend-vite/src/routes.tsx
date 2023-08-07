@@ -11,18 +11,20 @@ import {
 } from "react-router-dom";
 import List from "./list";
 import { Product } from './types/types';
+import ResponsiveNavMenu from "./nav";
 
 export function Fallback() {
     return <p>Performing initial data "load"</p>;
 }
 
 export function Layout() {
-    // const isIndexPage = useMatch('/');
+    const isIndexPage = useMatch('/');
 
     return (
         <>
-            <Outlet />
-            <List />
+            <ResponsiveNavMenu />
+            {isIndexPage && <List />}
+            <Outlet />    
         </>
     );
 }
