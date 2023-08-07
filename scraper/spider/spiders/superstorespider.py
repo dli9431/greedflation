@@ -249,7 +249,8 @@ class SuperstoreSpider(scrapy.Spider):
     page_from = 0
     page_size = 50
     store_id = 1517
-    category_id = 27998
+    # category_id = 27998
+    category_ids = [27998, 28005]
 
     def __init__(self, *args, **kwargs):
         super(SuperstoreSpider, self).__init__(*args, **kwargs)
@@ -283,7 +284,7 @@ class SuperstoreSpider(scrapy.Spider):
             print('has_been_scraped: True')
             return True
 
-    def generate_payload(self):
+    def generate_payload(self, cat_id):
         return {
             "pagination": {
                 "from": self.page_from,
@@ -297,7 +298,7 @@ class SuperstoreSpider(scrapy.Spider):
             "pcId": None,
             "pickupType": "STORE",
             "offerType": "ALL",
-            "categoryId": self.category_id,
+            "categoryId": cat_id,
         }
 
     def mark_as_scraped(self, url, payload):
@@ -309,16 +310,17 @@ class SuperstoreSpider(scrapy.Spider):
 
     def start_requests(self):
         print('start_requests')
-        payload = self.generate_payload()
-        print(payload)
-        if not self.has_been_scraped(self.url, payload):
-            yield scrapy.Request(
-                self.url,
-                method='POST',
-                body=json.dumps(payload),
-                headers=self.headers,
-                cb_kwargs=dict(payload=payload)
-            )
+        for cat_id in self.category_ids:
+            payload = self.generate_payload(cat_id)
+            print(payload)
+            if not self.has_been_scraped(self.url, payload):
+                yield scrapy.Request(
+                    self.url,
+                    method='POST',
+                    body=json.dumps(payload),
+                    headers=self.headers,
+                    cb_kwargs=dict(payload=payload)
+                )
 
     def parse(self, response, payload):
         print(response)
@@ -404,7 +406,3 @@ class SuperstoreSpider(scrapy.Spider):
             if not self.has_been_scraped(self.url, payload):
                 yield scrapy.Request(self.url, method='POST', body=json.dumps(payload),
                                      headers=self.headers, cb_kwargs=dict(payload=payload))
-
-class SuperstoreSpiderFrozen(SuperstoreSpider):
-    name = 'superstore_spider_frozen'
-    category_id = 28005
