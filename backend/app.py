@@ -28,6 +28,30 @@ class CustomJSONEncoder(JSONEncoder):
             return str(obj)  # convert ObjectId to string
         return super().default(obj)
 
+@app.route('/api/stores')
+def get_stores():
+    db = get_db()
+    stores = db['stores']
+    data = list(stores.find({}, {'_id': 0}))
+    return jsonify(data)
+
+@app.route('/api/store_product')
+def get_store_product():
+    db = get_db()
+    stores = db['store_product']
+    data = list(stores.find({}, {'_id': 0}))
+    return jsonify(data)
+
+@app.route('/api/find/<string:store_id>')
+def find_store(store_id):
+    db = get_db()
+    stores = db['stores']
+    store = stores.find_one({'id': store_id}, {'_id': 0})
+    if store is None:
+        return jsonify({'error': 'Store not found'})
+    else:
+        return jsonify(store)
+
 @app.route('/api/get_all')
 def get_all():
     db = get_db()
@@ -84,6 +108,9 @@ def get_all():
                 'prices.uom': 1,
                 'prices.pricing_units': 1
             }
+        },
+        {
+            '$limit': 100
         }
     ]
     data = list(products.aggregate(pipeline))

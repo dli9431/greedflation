@@ -2,7 +2,7 @@ import re
 import json
 import scrapy
 from datetime import datetime, timedelta
-from spider.items import ProductItem, PriceItem
+from spider.items import ProductItem, PriceItem, StoreItem
 import pymongo
 from . import payload as pyld
 
@@ -251,8 +251,9 @@ class SuperstoreSpider(scrapy.Spider):
     store_id = 1517
     # category_id = 27998
     # meat, frozen, fruit/veg, dairy/eggs, pantry, international, fish/seafood, snacks, drinks, organic, deli, bakery, prepared
-    category_ids = [27998, 28005, 28000, 28003, 28006, 58044, 27999, 57025, 28004, 28189, 28001, 28002, 27996] 
-    
+    category_ids = [27998, 28005, 28000, 28003, 28006, 58044,
+                    27999, 57025, 28004, 28189, 28001, 28002, 27996]
+
     def __init__(self, *args, **kwargs):
         super(SuperstoreSpider, self).__init__(*args, **kwargs)
         self.client = pymongo.MongoClient('mongodb://db:27017/')
@@ -328,11 +329,18 @@ class SuperstoreSpider(scrapy.Spider):
         data = json.loads(response.body)
         for product in data['results']:
             product_item = ProductItem(
+                product_category=payload['categoryId'],
                 product_code=product['code'],
                 name=product['name'],
                 brand=product['brand'],
                 url=product['link'],
                 # size=product['packageSize']
+            )
+
+            store_item = StoreItem(
+                product_code=product['code'],
+                store_id=payload['storeId'],
+                store_name=payload['banner']
             )
 
             # Check if the product already exists in the database
@@ -373,6 +381,15 @@ class SuperstoreSpider(scrapy.Spider):
                     price_item['size'] = float(match_size.group(1))
                     price_item['size_unit'] = match_size.group(2).lower()
                     price_item['pricing_units'] = product['pricingUnits']['type'].lower()
+
+            # Check if the product has an associated store
+            existing_store_product = self.db.store_product.find_one(
+                {"product_code": store_item["product_code"]})
+
+            # If product doesn't exist in the store_product collection
+            if not existing_store_product:
+                # Insert a new price document
+                self.db.store_product.insert_one(dict(store_item))
 
             # Check if the price already exists in the database
             existing_product_price = self.db.prices.find_one(

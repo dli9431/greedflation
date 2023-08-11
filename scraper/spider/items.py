@@ -6,6 +6,7 @@
 import scrapy
 
 class ProductItem(scrapy.Item):
+    product_category = scrapy.Field()
     product_code = scrapy.Field()
     name = scrapy.Field()
     brand = scrapy.Field()
@@ -39,3 +40,9 @@ class PriceItem(scrapy.Item):
     average_weight = scrapy.Field()
     uom = scrapy.Field()
     pricing_units = scrapy.Field() # SOLD_BY_EA or SOLD_BY_EA_PRICED_BY_WEIGHT
+
+class StoreItem(scrapy.Item):
+    product_code = scrapy.Field()
+    store_id = scrapy.Field()
+    store_name = scrapy.Field()
+    
